@@ -21,7 +21,7 @@ exports.create = function (req, res, next) {
 }
 
 //authenticate user
-exports.authenticate = async function (req, res, next) {
+exports.authenticate = function (req, res, next) {
 
     const { email, password } = req.body;
 
