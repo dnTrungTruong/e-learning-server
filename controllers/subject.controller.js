@@ -35,16 +35,6 @@ exports.getSubjectList = function (req, res ,next){
     })
 }
 
-exports.getSubjectList = function (req, res ,next){
-    Subject.find(function(err, result) {
-        if (err) {
-            next(err);
-        }
-        else {
-            res.status(200).json({ data: result });
-        }
-    })
-}
 
 exports.editSubject = function (req, res ,next) {
     Subject.findById(req.params.id, function (err, subject) {

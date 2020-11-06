@@ -7,12 +7,12 @@ const CourseSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  sub_id: {
+  subject: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Subject', //refer to collection subjects in DB in order to use populate
       required: true
   },
-  instructor_id: {
+  instructor: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User', //refer to collection users in DB in order to use populate
       required: true

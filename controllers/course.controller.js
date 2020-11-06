@@ -26,8 +26,8 @@ exports.getCourseInfo = function(req, res, next) {
 //Get course with detail information using populate
 exports.getCourseDetails = function(req, res, next) {
     Course.findById(req.params.id)
-    .populate('sub_id', '_id name')
-    .populate('instructor_id', 'firstname lastname')
+    .populate('subject', ' name')
+    .populate('instructor', 'firstname lastname')
     .exec(function (err, course) {
         if (err) {
             next(err);
@@ -48,6 +48,17 @@ exports.getCourseList = function(req, res, next) {
         }
     })
 }
+// This function need configuration
+// exports.getCourseListbySubject = function(req, res, next) {
+//     Course.find({subject : req.params.sub_id}, function(err, result) {
+//         if (err) {
+//             next(err);
+//         }
+//         else {
+//             res.status(200).json({ data: result });
+//         }
+//     })
+// }
 
 exports.editCourse = function (req, res ,next) {
     Course.findById(req.params.id, function (err, course) {
@@ -56,7 +67,7 @@ exports.editCourse = function (req, res ,next) {
         }
         else {
             course.name = req.body.name || course.name;
-            course.sub_id = req.body.sub_id || course.sub_id;
+            course.subject = req.body.subject || course.subject;
             course.description = req.body.description || course.description;
             course.price = req.body.price || course.price;
             
