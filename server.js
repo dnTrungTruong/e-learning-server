@@ -19,7 +19,7 @@ app.use("/api", routes)
 app.use(errorHandler)
 
 //connect to MongoDB
-mongoose.connect(config.connectionString, 
+mongoose.connect('mongodb://127.0.0.1:27017/e_learning',  //config.connectionString,
   {
     useNewUrlParser: true,
     useUnifiedTopology: true
