@@ -6,6 +6,7 @@ const router = express.Router();
 router.get('/list/course/:id', SectionController.getSectionList)
 router.get('/:id', SectionController.getSectionInfo)
 router.post('/', SectionController.createSection)
+router.post('/insert/:index', SectionController.insertSection)
 router.put('/:id', SectionController.editSection)
 router.delete('/:id', SectionController.deleteSection)
 

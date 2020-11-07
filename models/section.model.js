@@ -16,4 +16,5 @@ const SectionSchema = new mongoose.Schema({
 //use schema for 'section' collection schema
 const Section = mongoose.model('Section', SectionSchema);
 
+
 module.exports = Section;

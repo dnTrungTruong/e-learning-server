@@ -22,8 +22,11 @@ const CourseSchema = new mongoose.Schema({
   },
   price: {
       type: Number,
-      required: true
-  }
+      required: true  },
+  sections: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Section'
+  }]
 });
 
 //use schema for 'course' collection schema
