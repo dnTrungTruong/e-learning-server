@@ -26,8 +26,9 @@ exports.getCourseInfo = function(req, res, next) {
 //Get course with detail information using populate
 exports.getCourseDetails = function(req, res, next) {
     Course.findById(req.params.id)
-    .populate('subject', ' name')
+    .populate('subject', 'name')
     .populate('instructor', 'firstname lastname')
+    .populate('sections', 'name')
     .exec(function (err, course) {
         if (err) {
             next(err);

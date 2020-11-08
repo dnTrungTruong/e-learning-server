@@ -1,36 +1,36 @@
 const Section = require('../models/section.model')
 const Course = require('../models/course.model')
 
-exports.createSection = function(req, res, next){
-    const section = new Section(req.body);
+// exports.createSection = function(req, res, next){
+//     const section = new Section(req.body);
 
-    section.save(function (err, createdSection) { 
-        if (err) {
-            next(err)
-        }
-        else { //After saved, add Section to the end of sections list in course by using push()
-            Course.findById(createdSection.course, function (err, result) {
-                if (err) {
-                    next (err);
-                }
-                else {
-                    result.sections.push(createdSection._id); 
-                    result.save(function (err) { 
-                        if (err) {
-                            next(err);
-                        }
-                        else {
-                            res.status(200).json({data: createdSection})
-                        }
-                    })
+//     section.save(function (err, createdSection) { 
+//         if (err) {
+//             next(err)
+//         }
+//         else { //After saved, add Section to the end of sections list in course by using push()
+//             Course.findById(createdSection.course, function (err, result) {
+//                 if (err) {
+//                     next (err);
+//                 }
+//                 else {
+//                     result.sections.push(createdSection._id); 
+//                     result.save(function (err) { 
+//                         if (err) {
+//                             next(err);
+//                         }
+//                         else {
+//                             res.status(200).json({data: createdSection})
+//                         }
+//                     })
                     
-                }
-            })
-        }
-    })  
-}
+//                 }
+//             })
+//         }
+//     })  
+// }
 
-exports.insertSection = function(req, res, next){
+exports.createSection = function(req, res, next){
     const section = new Section(req.body);
 
     section.save(function (err, createdSection) { 
@@ -43,7 +43,14 @@ exports.insertSection = function(req, res, next){
                     next (err);
                 }
                 else {
-                    result.sections.splice(req.params.index, 0, createdSection._id); 
+                    //insert or append to sections list depend on index
+                    if (req.params.index) {
+                        result.sections.splice(req.params.index, 0, createdSection._id);
+                    }
+                    else {
+                        result.sections.push(createdSection._id);
+                    }
+                    
                     result.save(function (err) {
                         if (err) {
                             next(err);
