@@ -37,7 +37,7 @@ exports.createSection = function(req, res, next){
         if (err) {
             next(err)
         }
-        else { ////After saved, add Section to the index position sections list in course by using splice()
+        else { //After saved, add Section to the index position sections list in course by using splice()
             Course.findById(createdSection.course, function (err, result) {
                 if (err) {
                     next (err);

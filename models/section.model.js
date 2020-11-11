@@ -10,7 +10,11 @@ const SectionSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Course',
       required: true
-  }
+  },
+  lectures: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Lecture'
+  }]
 });
 
 //use schema for 'section' collection schema
