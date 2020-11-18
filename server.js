@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const errorHandler = require('./helpers/error-handler');
 const routes = require('./routes');
-const config = require('config.json')
+const config = require('config.json');
 
 //add config to url encoded & CORS
 app.use(express.urlencoded({ extended: false }));
