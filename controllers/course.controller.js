@@ -1,4 +1,5 @@
 const Course = require('../models/course.model')
+const User = require('../models/user.model')
 
 exports.createCourse = function(req, res, next) {
     const course = new Course(req.body);
@@ -8,7 +9,22 @@ exports.createCourse = function(req, res, next) {
             next(err)
         }
         else {
-            res.status(200).json({data: createdCourse})
+            User.findById(createdCourse.instructor, function (err, user) {
+                if (err) {
+                    next(err);
+                }
+                else {
+                    user.createdCourses.push(createdCourse._id)
+                    user.save(function (err, updatedUser) {
+                        if (err) {
+                            next(err);
+                        }
+                        else {
+                            res.status(200).json({data: createdCourse})
+                        }
+                    })
+                }
+            })
         }
     })
 }

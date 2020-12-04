@@ -22,7 +22,13 @@ const UserSchema = new mongoose.Schema({
   role: {
     type: String,
     required: true
-  }
+  },
+  enrolledCourses: [{
+    type: mongoose.Schema.Types.ObjectId
+  }],
+  createdCourses: [{
+    type: mongoose.Schema.Types.ObjectId
+  }]
 });
 
 //use schema for 'User' collection schema

@@ -11,10 +11,10 @@ const LectureSchema = new mongoose.Schema({
       ref: 'Section',
       required: true
    },
-  resources: [{
+  course: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Resource'
-  }]
+    required: true
+  }
 });
 
 //use schema for 'lecture' collection schema

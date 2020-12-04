@@ -19,6 +19,7 @@ exports.createLecture = function(req, res, next){
                     if (req.params.index) {
                         result.lectures.splice(req.params.index, 0, createdLecture._id);
                     }
+                    //insert to the end of lectures list
                     else {
                         result.lectures.push(createdLecture._id);
                     }
@@ -50,7 +51,7 @@ exports.getLectureInfo = function (req, res, next) {
 }
 
 exports.getLectureList = function (req, res ,next){
-    Section.findById(req.params.id)
+    Section.findById(req.params.section_id)
     .populate('lectures')
     .exec(function(err, result) {
         if (err) {

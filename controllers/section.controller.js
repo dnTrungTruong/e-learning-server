@@ -78,7 +78,7 @@ exports.getSectionInfo = function (req, res, next) {
 }
 
 exports.getSectionList = function (req, res ,next){
-    Course.findById(req.params.id)
+    Course.findById(req.params.course_id)
     .populate('sections')
     .exec(function(err, result) {
         if (err) {

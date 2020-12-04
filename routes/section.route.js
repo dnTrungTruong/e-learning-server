@@ -1,12 +1,25 @@
 const express = require('express');
 const SectionController = require('../controllers/section.controller');
-
+const Authorization = require('../helpers/authorization')
 const router = express.Router();
 
-router.get('/list/course/:id', SectionController.getSectionList)
+router.get('/listbycourse/:course_id', SectionController.getSectionList)
+
 router.get('/:id', SectionController.getSectionInfo)
-router.post('/:index?', SectionController.createSection)
-router.put('/:id', SectionController.editSection)
-router.delete('/:id', SectionController.deleteSection)
+
+router.post('/:index?', 
+Authorization.authorize(),
+Authorization.authorizeCreatedCourseWithSection(), 
+SectionController.createSection)
+
+router.put('/:id', 
+Authorization.authorize(),
+Authorization.authorizeCreatedCourseWithSection(), 
+SectionController.editSection)
+
+router.delete('/:id', 
+Authorization.authorize(),
+Authorization.authorizeCreatedCourseWithSection(), 
+SectionController.deleteSection)
 
 module.exports = router

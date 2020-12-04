@@ -1,5 +1,5 @@
 const express = require('express');
-const authorize = require('../helpers/authorize')
+const Authorization = require('../helpers/authorization')
 const UserController = require('../controllers/user.controller')
 const Role = require('../helpers/role');
 
@@ -7,11 +7,11 @@ const router = express.Router();
 
 router.post('/register', UserController.create)
 router.post('/authenticate', UserController.authenticate)
-router.get('/:id', authorize(), UserController.getUserInfo)
+router.get('/:id', Authorization.authorize(), UserController.getUserInfo)
 
-router.get('/list/student', authorize(Role.Admin), UserController.getStudentList)
-router.get('/list/instructor', authorize(Role.Admin), UserController.getInstructorList)
-router.get('/list/moderator', authorize(Role.Admin), UserController.getModeratorList)
+router.get('/list/student', Authorization.authorize(Role.Admin), UserController.getStudentList)
+router.get('/list/instructor', Authorization.authorize(Role.Admin), UserController.getInstructorList)
+router.get('/list/moderator', Authorization.authorize(Role.Admin), UserController.getModeratorList)
 
-router.put('/:id', authorize(), UserController.editInfo)
+router.put('/:id', Authorization.authorize(), UserController.editInfo)
 module.exports = router
