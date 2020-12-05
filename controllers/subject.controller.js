@@ -8,7 +8,7 @@ exports.createSubject = function(req, res, next){
             next(err)
         }
         else {
-            res.status(200).json({data: createdSubject})
+            res.status(200).json({message: "success", data: createdSubject})
         }
     })
 }
@@ -19,7 +19,7 @@ exports.getSubjectInfo = function (req, res, next) {
             next(err);
         }
         else {
-            res.status(200).json({ data: subject });
+            res.status(200).json({message: "success", data: subject });
         }
     });
 }
@@ -30,7 +30,7 @@ exports.getSubjectList = function (req, res ,next){
             next(err);
         }
         else {
-            res.status(200).json({ data: result });
+            res.status(200).json({message: "success", data: result });
         }
     })
 }
@@ -49,7 +49,7 @@ exports.editSubject = function (req, res ,next) {
                     next(err);
                 }
                 else {
-                    res.status(200).json({data: updatedSubject})
+                    res.status(200).json({message: "success", data: updatedSubject})
                 }
             })
         }
@@ -67,7 +67,7 @@ exports.deleteSubject = function(req, res, next){
                     next(err);
                 }
                 else {
-                    res.status(200).json({data : deletedSubject})
+                    res.status(200).json({message: "success", data : deletedSubject})
                 }
             })
         }

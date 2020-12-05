@@ -29,7 +29,7 @@ exports.createLecture = function(req, res, next){
                             next(err);
                         }
                         else {
-                            res.status(200).json({data: createdLecture})
+                            res.status(200).json({message: "success", data: createdLecture})
                         }
                     })
                     
@@ -45,7 +45,7 @@ exports.getLectureInfo = function (req, res, next) {
             next(err);
         }
         else {
-            res.status(200).json({ data: lecture });
+            res.status(200).json({message: "success", data: lecture });
         }
     });
 }
@@ -58,7 +58,7 @@ exports.getLectureList = function (req, res ,next){
             next(err);
         }
         else {
-            res.status(200).json({ data: result.lectures });
+            res.status(200).json({message: "success", data: result.lectures });
         }
     })
 }
@@ -77,7 +77,7 @@ exports.editLecture = function (req, res ,next) {
                     next(err);
                 }
                 else {
-                    res.status(200).json({data: updatedLecture})
+                    res.status(200).json({message: "success", data: updatedLecture})
                 }
             })
         }
@@ -106,7 +106,7 @@ exports.deleteLecture = function(req, res, next){
                                     next(err);
                                 }
                                 else {
-                                    res.status(200).json({data : deletedLecture})
+                                    res.status(200).json({message: "success", data : deletedLecture})
                                 }
                             })
                         }

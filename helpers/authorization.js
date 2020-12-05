@@ -3,6 +3,7 @@ const { secret } = require('config.json');
 const User = require('../models/user.model');
 const Section = require('../models/section.model');
 const Lecture = require('../models/lecture.model');
+const Role = require('../helpers/role');
 
 
 
@@ -29,6 +30,26 @@ exports.authorize=function authorize(roles = []) {
             next();
         }
     ];
+}
+
+exports.authorizeIdentity = function () {
+    return [
+        (req, res ,next) => {
+            if(req.method == "GET") { 
+                if ((res.locals.user.role == Role.Instructor || res.locals.user.role == Role.Student) &&
+                    res.locals.user.sub != req.params.id) 
+                {
+                    return res.status(401).json({ message: 'Unauthorized' });
+                } 
+            }
+            else {
+                if (req.params.id != res.locals.user.sub ) {
+                    return res.status(401).json({ message: 'Unauthorized' });
+                }
+            }
+            next();
+        }
+    ]
 }
 
 exports.authorizeCreatedCourse = function () {
@@ -62,16 +83,11 @@ exports.authorizeCreatedCourseWithSection = function () {
                     // if method is POST then the course_id is in req.body.course
                     if (req.method == "POST") {
                         if (req.body.course) {
-                            if (user.createdCourses.includes(req.body.course)) {
-                                next()
-                            }
-                            else {
+                            if (!user.createdCourses.includes(req.body.course)) {
                                 return res.status(401).json({ message: 'Unauthorized' });
                             }
                         }
-                        else {
-                            next()
-                        }
+                        next();
                     }
                     //else we need to find the section with the section_id in the params to get the course_id
                     else {
@@ -80,15 +96,14 @@ exports.authorizeCreatedCourseWithSection = function () {
                                 next(error);
                             }
                             else {
-                                if (user.createdCourses.includes(section.course)) {
-                                    next()
-                                }
-                                else {
+                                if (!user.createdCourses.includes(section.course)) {
                                     return res.status(401).json({ message: 'Unauthorized' });
-                                }                        
+                                }
+                                next();  
                             }
                         })
                     }
+                       
                 }
             });
         }
@@ -106,16 +121,11 @@ exports.authorizeCreatedCourseWithLecture = function () {
                     // if method is POST then the course_id is in req.body.course
                     if (req.method == "POST") {
                         if (req.body.course) {
-                            if (user.createdCourses.includes(req.body.course)) {
-                                next()
-                            }
-                            else {
+                            if (!user.createdCourses.includes(req.body.course)) {
                                 return res.status(401).json({ message: 'Unauthorized' });
                             }
                         }
-                        else {
-                            next()
-                        }
+                        next();
                     }
                     //else we need to find the section with the lecture_id in the params to get the course_id
                     else {
@@ -124,12 +134,10 @@ exports.authorizeCreatedCourseWithLecture = function () {
                                 next(error);
                             }
                             else {
-                                if (user.createdCourses.includes(lecture.course)) {
-                                    next()
-                                }
-                                else {
+                                if (!user.createdCourses.includes(lecture.course)) {
                                     return res.status(401).json({ message: 'Unauthorized' });
-                                }                        
+                                }
+                                next();                
                             }
                         })
                     }
@@ -139,7 +147,7 @@ exports.authorizeCreatedCourseWithLecture = function () {
     ];
 }
 
-exports.authorizeEnrolledCourse = function () {
+exports.authorizeCourseWithFile = function () {
     return [
         (req, res , next) => {
             User.findById(req.user.sub, function (err, user) {
@@ -147,28 +155,24 @@ exports.authorizeEnrolledCourse = function () {
                     next(err);
                 }
                 else {
-                    // if method is POST then the course_id is in req.body.course
                     Section.findById(req.params.section_id, function(err, section) {
                         if (err) {
                             next(err)
                         }
                         else {
                             if(req.method == "GET") {
-                                if (user.enrolledCourses.includes(section.course)) {
-                                    next()
-                                }
-                                else {
+                                if ((res.locals.user.role == Role.Student || res.locals.user.role == Role.Instructor) &&
+                                (!user.enrolledCourses.includes(section.course) && !user.createdCourses.includes(section.course)))
+                                {
                                     return res.status(401).json({ message: 'Unauthorized' });
                                 }
                             }
                             else {
-                                if (user.createdCourses.includes(section._id)) {
-                                    next()
-                                }
-                                else {
+                                if (!user.createdCourses.includes(section.course)) {
                                     return res.status(401).json({ message: 'Unauthorized' });
                                 }
                             }
+                            next()
                         }
                     })
                 }

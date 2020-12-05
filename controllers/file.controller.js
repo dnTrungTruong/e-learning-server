@@ -20,7 +20,7 @@ exports.upload = (req, res) => {
           }
           //Need to check if file exists (not coded yet) and send message
           return res.status(200).send({
-            message: "Uploaded the file successfully"
+            message: "success"
           });
         })
         .catch((err) => {
@@ -57,7 +57,7 @@ exports.getListFiles = (req, res) => {
       });
     });
 
-    res.status(200).send(fileInfos);
+    res.status(200).json({message: "success", data: fileInfos});
   });
 };
 
@@ -85,10 +85,8 @@ exports.delete = (req, res) => {
       });
     }
     else {
-      return res.status(200).send({
-        message: "The file is deleted."
-      })
+      return res.status(200).json({message: "success"})
     }
   });
-  //Need to add delete folder when folder is empty
+  //Need to delete folder when folder is empty
 };

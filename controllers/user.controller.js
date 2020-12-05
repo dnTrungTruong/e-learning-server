@@ -2,132 +2,190 @@ const Role = require('../helpers/role')
 const User = require('../models/user.model')
 const config = require('config.json');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs')
 
+function removeUserPassword(user, index, arr) {
+    const { password, __v, ...userWithoutPassword } = user._doc;
+    arr[index]=userWithoutPassword 
+}
 
 //create new user function
-//password hash needed
 //birthday incorrect - need momentjs
-exports.create = function (req, res, next) {
+exports.create = async function (req, res, next) {
     const user = new User(req.body);
 
-    user.save(function (err, createdUser) {
-        if (err) {
-            next(err)
-        }
-        else {
-            res.status(200).json({data: createdUser})
-        }
-    })
+    try{
+        //Hash password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(req.body.password, salt);
+        user.password = hashedPassword;
+
+        const createdUser = await user.save();
+        res.status(200).json({message: "success", data: createdUser})
+    }catch (err) {
+        next(err);
+    }
+    
+
+    //Hash password
+    // bcrypt.genSalt(10, function (err, salt) {
+    //     if (err) {
+    //         next(err);
+    //     }
+    //     else {
+    //         bcrypt.hash(user.password, salt, function (err, hashedPassword) {
+    //             if (err) {
+    //                 next(err);
+    //             }
+    //             else {
+    //                 user.password= hashedPassword;
+    //                 user.save(function (err, createdUser) {
+    //                     if (err) {
+    //                         next(err)
+    //                     }
+    //                     else {
+    //                         res.status(200).json({data: createdUser})
+    //                     }
+    //                 })
+    //             }
+    //         })
+    //     }
+    // })
+
+    
 }
 
 //authenticate user
-exports.authenticate = function (req, res, next) {
+exports.authenticate = async function (req, res, next) {
 
-    const { email, password } = req.body;
+    try {
+        const user = await User.findOne({ email: req.body.email });
+        if (!user) return res.status(400).json({message: "Email or password is incorrect"});
 
-    User.findOne({ email: email, password: password }, function (err, result) {
-        if (err) {
-            next(err);
-        }
-        else {
-            if (result) {
-                const user = result._doc;
-                const token = jwt.sign({ sub: user._id, role: user.role }, config.secret);
-                const { password, __v, ...userWithoutPassword } = user;
-                const authData = {
-                    'data': userWithoutPassword,
-                    token
-                };
+        const valid = await bcrypt.compare(req.body.password, user.password);
+        if (!valid) return res.status(400).json({message: "Email or password is incorrect"});
+        
+        const userData = user._doc;
+        const token = jwt.sign({ sub: userData._id, role: userData.role }, config.secret);
+        const { password, __v, ...userWithoutPassword } = userData;
+        const authData = {
+            'data': userWithoutPassword,
+            token
+        };
+        res.status(200).json({message: "success", data: authData});
+    }
+    catch (err) {
+        next(err)
+    }
 
-                res.status(200).json(authData);
-            }
-            else {
-                res.status(400).json({ message: 'Email or password is incorrect' })
-            }
-        }
-    })
+    // User.findOne({ email: email }, function (err, result) {
+    //     if (err) {
+    //         next(err);
+    //     }
+    //     else {
+    //         if (result) {
+    //             bcrypt.compare(password, result.password, function (err, success) {
+    //                 if (err) {
+    //                     next(err);
+    //                 }
+    //                 else {
+    //                     if (success) {
+    //                     const user = result._doc;
+    //                     const token = jwt.sign({ sub: user._id, role: user.role }, config.secret);
+    //                     const { password, __v, ...userWithoutPassword } = user;
+    //                     const authData = {
+    //                         'data': userWithoutPassword,
+    //                         token
+    //                     };
+
+    //                     res.status(200).json(authData);
+    //                     }
+    //                     else {
+    //                         res.status(400).json({ message: 'Email or password is incorrect' })
+    //                     }
+    //                 }
+    //             })
+    //         }
+    //         else {
+    //             res.status(400).json({ message: 'Email or password is incorrect' })
+    //         }
+    //     }
+    // })
 
 }
 
 //get user info
 exports.getUserInfo = function (req, res, next) {
-
-    if (req.params.id == res.locals.user.sub || res.locals.user.role == Role.Admin) {
-        User.findById(req.params.id, function (err, user) {
-            if (err) {
-                next(err);
+    User.findById(req.params.id, function (err, user) {
+        if (err) {
+            next(err);
+        }
+        else {
+            if (user) {
+                const { password, __v, ...userWithoutPassword } = user._doc;
+                res.status(200).json({message: "success", data: userWithoutPassword });
             }
             else {
-                const { password, __v, ...userWithoutPassword } = user._doc;
-                res.status(200).json({ data: userWithoutPassword });
+                res.status(404).json({ message: "No result" });
             }
-        });
-    }
-    else {
-        res.status(401).json({ message: 'Unauthorized' });
-    }
+        }
+    });
 }
 
 exports.editInfo = function (req, res, next) {
+    User.findById(req.params.id, function (err, user) {
+        if (err) {
+            next(err);
+        }
+        else {
+            user.firstname = req.body.firstname || user.firstname;
+            user.lastname = req.body.lastname || user.lastname;
+            user.birthday = req.body.birthday || user.birthday;
 
-    if (req.params.id == res.locals.user.sub) {
-        User.findById(req.params.id, function (err, user) {
-            if (err) {
-                next(err);
-            }
-            else {
-                user.firstname = req.body.firstname || user.firstname;
-                user.lastname = req.body.lastname || user.lastname;
-                user.birthday = req.body.birthday || user.birthday;
-    
-                user.save(function (err, updatedUser) {
-                    if (err) {
-                        next(err);
-                    }
-                    else {
-                        res.status(200).json({data: updatedUser})
-                    }
-                })
-            }
-        })
-    }
-    else {
-        res.status(401).json({ message: 'Unauthorized' });
-    }
+            user.save(function (err, updatedUser) {
+                if (err) {
+                    next(err);
+                }
+                else {
+                    res.status(200).json({message: "success", data: updatedUser})
+                }
+            })
+        }
+    })
 }
 
-//get student list (include password - need fix)
 exports.getStudentList = function (req, res, next) {
     User.find({ role: Role.Student }, function (err, result) {
         if (err) {
             next(err);
         }
         else {
-            res.status(200).json({ data: result });
+            result.forEach(removeUserPassword)
+            res.status(200).json({message: "success", data: result });
         }
     })
 }
 
-//get instructor list (include password - need fix)
 exports.getInstructorList = function (req, res, next) {
     User.find({ role: Role.Instructor }, function (err, result) {
         if (err) {
             next(err);
         }
         else {
-            res.status(200).json({ data: result });
+            result.forEach(removeUserPassword)
+            res.status(200).json({message: "success", data: result });
         }
     })
 }
 
-//get moderator list (include password - need fix)
 exports.getModeratorList = function (req, res, next) {
     User.find({ role: Role.Moderator }, function (err, result) {
         if (err) {
             next(err);
         }
         else {
-            res.status(200).json({ data: result });
+            result.forEach(removeUserPassword)
+            res.status(200).json({message: "success", data: result });
         }
     })
 }

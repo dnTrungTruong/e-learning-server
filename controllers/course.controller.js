@@ -20,7 +20,7 @@ exports.createCourse = function(req, res, next) {
                             next(err);
                         }
                         else {
-                            res.status(200).json({data: createdCourse})
+                            res.status(200).json({message: "success", data: createdCourse})
                         }
                     })
                 }
@@ -35,7 +35,7 @@ exports.getCourseInfo = function(req, res, next) {
             next(err);
         }
         else {
-            res.status(200).json({ data: course });
+            res.status(200).json({message: "success", data: course });
         }
     });
 }
@@ -50,7 +50,7 @@ exports.getCourseDetails = function(req, res, next) {
             next(err);
         }
         else {
-            res.status(200).json({ data: course });
+            res.status(200).json({message: "success", data: course });
         }
     });
 }
@@ -61,7 +61,7 @@ exports.getCourseList = function(req, res, next) {
             next(err);
         }
         else {
-            res.status(200).json({ data: result });
+            res.status(200).json({message: "success", data: result });
         }
     })
 }
@@ -93,7 +93,7 @@ exports.editCourse = function (req, res ,next) {
                     next(err);
                 }
                 else {
-                    res.status(200).json({data: updatedCourse})
+                    res.status(200).json({message: "success", data: updatedCourse})
                 }
             })
         }
@@ -111,7 +111,7 @@ exports.deleteCourse = function(req, res, next){
                     next(err);
                 }
                 else {
-                    res.status(200).json({data : deletedCourse})
+                    res.status(200).json({message: "success", data : deletedCourse})
                 }
             })
         }

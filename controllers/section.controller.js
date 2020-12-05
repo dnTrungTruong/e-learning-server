@@ -56,7 +56,7 @@ exports.createSection = function(req, res, next){
                             next(err);
                         }
                         else {
-                            res.status(200).json({data: createdSection})
+                            res.status(200).json({message: "success", data: createdSection})
                         }
                     })
                     
@@ -72,7 +72,7 @@ exports.getSectionInfo = function (req, res, next) {
             next(err);
         }
         else {
-            res.status(200).json({ data: section });
+            res.status(200).json({message: "success", data: section });
         }
     });
 }
@@ -85,7 +85,7 @@ exports.getSectionList = function (req, res ,next){
             next(err);
         }
         else {
-            res.status(200).json({ data: result.sections });
+            res.status(200).json({message: "success", data: result.sections });
         }
     })
 }
@@ -104,7 +104,7 @@ exports.editSection = function (req, res ,next) {
                     next(err);
                 }
                 else {
-                    res.status(200).json({data: updatedSection})
+                    res.status(200).json({message: "success", data: updatedSection})
                 }
             })
         }
@@ -133,7 +133,7 @@ exports.deleteSection = function(req, res, next){
                                     next(err);
                                 }
                                 else {
-                                    res.status(200).json({data : deletedSection})
+                                    res.status(200).json({message: "success", data : deletedSection})
                                 }
                             })
                         }
