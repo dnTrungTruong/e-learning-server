@@ -1,13 +1,12 @@
 const Role = require('../helpers/role')
 const User = require('../models/user.model')
+const validate = require('../helpers/validationSchemas')
 const config = require('config.json');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs')
 
-function removeUserPassword(user, index, arr) {
-    const { password, __v, ...userWithoutPassword } = user._doc;
-    arr[index]=userWithoutPassword 
-}
+
+
 
 //create new user function
 //birthday incorrect - need momentjs
@@ -15,6 +14,9 @@ exports.create = async function (req, res, next) {
     const user = new User(req.body);
 
     try{
+        // const {validationError} = validate.registerValidation(req.body);
+        // if (validationError) return res.status(400).json({message: validationError.message});
+
         //Hash password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(req.body.password, salt);
@@ -138,55 +140,91 @@ exports.editInfo = function (req, res, next) {
             next(err);
         }
         else {
-            user.firstname = req.body.firstname || user.firstname;
-            user.lastname = req.body.lastname || user.lastname;
-            user.birthday = req.body.birthday || user.birthday;
+            if (user) {
+                user.firstname = req.body.firstname || user.firstname;
+                user.lastname = req.body.lastname || user.lastname;
+                user.birthday = req.body.birthday || user.birthday;
 
-            user.save(function (err, updatedUser) {
+                user.save(function (err, updatedUser) {
+                    if (err) {
+                        next(err);
+                    }
+                    else {
+                        res.status(200).json({message: "success", data: updatedUser})
+                    }
+                })
+            }
+            else {
+                res.status(404).json({ message: "No result" });
+            }
+            
+        }
+    })
+}
+
+exports.getUserByRole = function (role) {
+    return [
+        (req, res, next) => {
+            User.find({ role: role }, function (err, result) {
                 if (err) {
                     next(err);
                 }
                 else {
-                    res.status(200).json({message: "success", data: updatedUser})
+                    if (result) {
+                        result.forEach(function removeUserPassword(user, index) {
+                            const { password, __v, ...userWithoutPassword } = user._doc;
+                            result[index]=userWithoutPassword 
+                        })
+                        res.status(200).json({message: "success", data: result });
+                    }
+                    else {
+                        res.status(404).json({ message: "No result" });
+                    }
                 }
             })
         }
-    })
+    ]
+    
 }
 
-exports.getStudentList = function (req, res, next) {
-    User.find({ role: Role.Student }, function (err, result) {
-        if (err) {
-            next(err);
-        }
-        else {
-            result.forEach(removeUserPassword)
-            res.status(200).json({message: "success", data: result });
-        }
-    })
-}
+// exports.getStudentList = function (req, res, next) {
+//     User.find({ role: Role.Student }, function (err, result) {
+//         if (err) {
+//             next(err);
+//         }
+//         else {
+//             if (result) {
+//                 result.forEach(removeUserPassword)
+//                 res.status(200).json({message: "success", data: result });
+//             }
+//             else {
+//                 res.status(404).json({ message: "No result" });
+//             }
+//         }
+//     })
+// }
 
-exports.getInstructorList = function (req, res, next) {
-    User.find({ role: Role.Instructor }, function (err, result) {
-        if (err) {
-            next(err);
-        }
-        else {
-            result.forEach(removeUserPassword)
-            res.status(200).json({message: "success", data: result });
-        }
-    })
-}
+// exports.getInstructorList = function (req, res, next) {
+//     User.find({ role: Role.Instructor }, function (err, result) {
+//         if (err) {
+//             next(err);
+//         }
+//         else {
+//             result.forEach(removeUserPassword)
+//             res.status(200).json({message: "success", data: result });
+//         }
+//     })
+// }
 
-exports.getModeratorList = function (req, res, next) {
-    User.find({ role: Role.Moderator }, function (err, result) {
-        if (err) {
-            next(err);
-        }
-        else {
-            result.forEach(removeUserPassword)
-            res.status(200).json({message: "success", data: result });
-        }
-    })
-}
+// exports.getModeratorList = function (req, res, next) {
+//     User.find({ role: Role.Moderator }, function (err, result) {
+//         if (err) {
+//             next(err);
+//         }
+//         else {
+//             result.forEach(removeUserPassword)
+//             res.status(200).json({message: "success", data: result });
+//         }
+//     })
+// }
 
