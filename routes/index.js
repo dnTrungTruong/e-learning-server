@@ -5,7 +5,7 @@ const subjectRoute = require('./subject.route')
 const courseRoute = require('./course.route')
 const sectionRoute = require('./section.route')
 const lectureRoute = require('./lecture.route')
-const resourceRoute = require('./resource.route')
+const quizRoute = require('./quiz.route')
 const fileRoute = require('./file.route')
 
 //index of routes
@@ -18,6 +18,7 @@ router.use('/subject', subjectRoute)
 router.use('/course', courseRoute)
 router.use('/section', sectionRoute)
 router.use('/lecture', lectureRoute)
+router.use('/quiz', quizRoute)
 //router.use('/resource', resourceRoute) No need at the moment
 router.use('/file', fileRoute)
 

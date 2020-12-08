@@ -13,13 +13,13 @@ const baseUrl = "http://localhost:3000/api/file/";
 exports.uploadImage = (req, res) => {
   fs.mkdir(__basedir + "/temp/", { recursive: true }, err => {
     if (err) {
-      return res.status(500).json({message: err.message})
+      return res.status(200).json({message: err.message})
     } 
     else {
       upload.uploadImage(req, res)
       .then(() => {
         if (req.file == undefined) {
-          return res.status(400).send({ message: "Please upload a image!" });
+          return res.status(200).send({ message: "Please upload a image!" });
         }
         cloudinary.config({
           cloud_name: config.CLOUD_NAME,
@@ -68,7 +68,7 @@ exports.uploadImage = (req, res) => {
             //         "original_extension": "JPG"
             //     }
             // }
-              return res.status(200).json({message: "success", data: image.secure_url});
+              return res.status(200).json({message: "success", data: image.public_id});
           }
       )
         //Need to check if file exists (not coded yet) and send message
@@ -77,24 +77,40 @@ exports.uploadImage = (req, res) => {
         // });
       })
       .catch((err) => {
-        return res.status(500).send({
+        return res.status(200).send({
           message: `Could not upload the file: ${err}`,
         });
       })
     }
   });
 }
+exports.deleteImage = (req, res) => {
+  cloudinary.config({
+    cloud_name: config.CLOUD_NAME,
+    api_key: config.CLOUDINARY_API_KEY,
+    api_secret: config.CLOUDINARY_API_SECRET
+  });
+  cloudinary.uploader.destroy(req.body.public_id, function(err, result) {
+    console.log(result);
+     if (err) {
+       return res.status(200).json({message: err});
+     }
+     else {
+       return res.status(200).json({message: "success"});
+     }
+    });
+}
 
 exports.uploadDoc = (req, res) => {
     fs.mkdir(path.resolve(resourcesDir.replace("/", ""), req.params.section_id), { recursive: true }, err => {
       if (err) {
-        return res.status(500).json({message: err.message})
+        return res.status(200).json({message: err.message})
       } 
       else {
         upload.uploadDoc(req, res)
         .then(() => {
           if (req.file == undefined) {
-            return res.status(400).send({ message: "Please upload a file!" });
+            return res.status(200).send({ message: "Please upload a file!" });
           }
           //Need to check if file exists (not coded yet) and send message
           return res.status(200).send({
@@ -103,12 +119,12 @@ exports.uploadDoc = (req, res) => {
         })
         .catch((err) => {
           if (err.code == "LIMIT_FILE_SIZE") {
-            return res.status(500).send({
+            return res.status(200).send({
               message: "File size cannot be larger than 20MB!",
             });
           }
       
-          return res.status(500).send({
+          return res.status(200).send({
             message: `Could not upload the file: ${err}`,
           });
         })
@@ -121,7 +137,7 @@ exports.getListFiles = (req, res) => {
 
   fs.readdir(directoryPath, function (err, files) {
     if (err) {
-      return res.status(500).send({
+      return res.status(200).send({
         message: "Unable to scan files!",
       });
     }
@@ -145,7 +161,7 @@ exports.download = (req, res) => {
 
   res.download(directoryPath + fileName, fileName, (err) => {
     if (err) {
-      res.status(500).send({
+      res.status(200).send({
         message: "Could not download the file. " + err,
       });
     }
@@ -158,7 +174,7 @@ exports.delete = (req, res) => {
 
   fs.unlink(directoryPath + fileName, (err) => {
     if (err) {
-      res.status(500).send({
+      res.status(200).send({
         message: "Could not delete the file. " + err,
       });
     }

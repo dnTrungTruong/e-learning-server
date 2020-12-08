@@ -60,17 +60,17 @@ exports.authenticate = async function (req, res, next) {
 
     try {
         const user = await User.findOne({ email: req.body.email });
-        if (!user) return res.status(400).json({message: "Email or password is incorrect"});
+        if (!user) return res.status(200).json({message: "Email or password is incorrect"});
 
         const valid = await bcrypt.compare(req.body.password, user.password);
-        if (!valid) return res.status(400).json({message: "Email or password is incorrect"});
+        if (!valid) return res.status(200).json({message: "Email or password is incorrect"});
         
         const userData = user._doc;
         const token = jwt.sign({ sub: userData._id, role: userData.role }, config.secret);
         const { password, __v, ...userWithoutPassword } = userData;
         const authData = {
-            'data': userWithoutPassword,
-            token
+            'userdata': userWithoutPassword,
+            'token': token
         };
         res.status(200).json({message: "success", data: authData});
     }
@@ -126,7 +126,7 @@ exports.getUserInfo = function (req, res, next) {
                 res.status(200).json({message: "success", data: userWithoutPassword });
             }
             else {
-                res.status(404).json({ message: "No result" });
+                res.status(200).json({ message: "No result" });
             }
         }
     });
@@ -153,7 +153,7 @@ exports.editInfo = function (req, res, next) {
                 })
             }
             else {
-                res.status(404).json({ message: "No result" });
+                res.status(200).json({ message: "No result" });
             }
             
         }
@@ -176,7 +176,7 @@ exports.getUserByRole = function (role) {
                         res.status(200).json({message: "success", data: result });
                     }
                     else {
-                        res.status(404).json({ message: "No result" });
+                        res.status(200).json({ message: "No result" });
                     }
                 }
             })

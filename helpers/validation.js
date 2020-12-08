@@ -12,6 +12,6 @@ exports.validation = (schema, property) => {
       const { details } = error; 
       const errorMessage = details.map(i => i.message).join(',');
    
-     res.status(422).json({ message: errorMessage  }) } 
+     res.status(200).json({ message: errorMessage  }) } 
     } 
   } 

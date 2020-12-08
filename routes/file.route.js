@@ -23,6 +23,7 @@ FileController.uploadDoc)
 
 
 //router.put('/:id', FileController.editResources)
+router.delete('/image/', FileController.deleteImage)
 
 router.delete('/:section_id/:name',
 Authorization.authorize([Role.Instructor, Role.Moderator, Role.Admin]),

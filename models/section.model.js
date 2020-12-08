@@ -14,7 +14,11 @@ const SectionSchema = new mongoose.Schema({
   lectures: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Lecture'
-  }]
+  }],
+  quiz: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Quiz'
+  }
 });
 
 //use schema for 'section' collection schema
