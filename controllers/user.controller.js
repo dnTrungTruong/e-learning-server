@@ -14,8 +14,6 @@ exports.create = async function (req, res, next) {
     const user = new User(req.body);
 
     try{
-        // const {validationError} = validate.registerValidation(req.body);
-        // if (validationError) return res.status(400).json({message: validationError.message});
 
         //Hash password
         const salt = await bcrypt.genSalt(10);

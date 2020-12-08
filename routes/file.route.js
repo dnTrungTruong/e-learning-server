@@ -12,10 +12,15 @@ Authorization.authorize(),
 Authorization.authorizeCourseWithFile(),
 FileController.download)
 
+router.post('/image/',
+FileController.uploadImage)
+
 router.post('/:section_id',
 Authorization.authorize([Role.Instructor, Role.Moderator, Role.Admin]),
 Authorization.authorizeCourseWithFile(),
-FileController.upload)
+FileController.uploadDoc)
+
+
 
 //router.put('/:id', FileController.editResources)
 

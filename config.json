@@ -1,4 +1,7 @@
 ﻿{
     "connectionString": "mongodb+srv://MongoDbNHHD:SfDthhogpRoKJz8z@e-learning-cluster.oa8ny.mongodb.net/elearning?retryWrites=true&w=majority",
-    "secret": "DAMNGUYENTRUNGTRUONG20051999"
+    "secret": "DAMNGUYENTRUNGTRUONG20051999",
+    "CLOUD_NAME": "ducnguyen14665",
+    "CLOUDINARY_API_KEY": "483961554886892",
+    "CLOUDINARY_API_SECRET": "RRZ0hK2l5thE9tDbMnJf11zUc-M"
 }
