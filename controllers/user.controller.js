@@ -11,14 +11,14 @@ const bcrypt = require('bcryptjs')
 //create new user function
 //birthday incorrect - need momentjs
 exports.create = async function (req, res, next) {
-    const user = new User(req.body);
-
     try{
-
+        const user = new User(req.body);
+        user.role = Role.Student;
         //Hash password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(req.body.password, salt);
         user.password = hashedPassword;
+
 
         const createdUser = await user.save();
         res.status(200).json({message: "success", data: createdUser})

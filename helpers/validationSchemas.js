@@ -6,7 +6,6 @@ exports.registerSchema= Joi.object().keys({
     firstname: Joi.string().max(20).required(),
     lastname: Joi.string().max(20).required(),
     birthday: Joi.date().iso(), //need to be in ISO 8601 format
-    role: Joi.string().required()
 }) 
 // exports.schemas = (data) => {
 //     const schema = Joi.object({
