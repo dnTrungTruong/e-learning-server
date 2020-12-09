@@ -1,6 +1,10 @@
 const Role = require('../helpers/role')
 const User = require('../models/user.model')
 const validate = require('../helpers/validationSchemas')
+const SecretCode = require('../models/secretcode.model')
+const cryptoRandomString = require('crypto-random-string')
+const emailService = require('../helpers/emailService')
+
 const config = require('config.json');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs')
@@ -132,6 +136,8 @@ exports.getUserInfo = function (req, res, next) {
     });
 }
 
+
+
 exports.editInfo = function (req, res, next) {
     User.findById(req.params.id, function (err, user) {
         if (err) {
@@ -158,6 +164,180 @@ exports.editInfo = function (req, res, next) {
             
         }
     })
+}
+
+exports.enrollCourse = function (req, res ,next) {
+    //NEED TO CONFIRM BEFORE ADD TO COURSE
+    User.findById(res.locals.user.sub, function (err, user) {
+        if (err) {
+            next(err);
+        }
+        else {
+            user.enrolledCourses.push(req.params.course_id);
+            
+            user.save(function (err, updatedUser) {
+                if (err) {
+                    next(err);
+                }
+                else {
+                    res.status(200).json({message: "success", data: updatedUser})
+                }
+            })
+        }
+    })
+}
+
+exports.sendVerifyMail = async function (req, res ,next) {
+    const baseUrl = req.protocol + "://" + req.get("host");
+    try {
+        const user = await User.findById(res.locals.user.sub);
+
+        if (!user) {
+            res.json({ message: "This email is not associated with any account" });
+        } else {
+            if (user.isVerified) {
+                return res.status(200).json({message: "Email have already been verified"})
+            }
+            await SecretCode.deleteMany({ email: user.email });
+
+            const secretCode = cryptoRandomString({
+                length: 6,
+            });
+            const newCode = new SecretCode({
+                code: secretCode,
+                email: user.email,
+            });
+            await newCode.save();
+
+            const data = {
+                from: config.EMAIL_USERNAME,
+                to: user.email,
+                subject: "Your Activation Link for YOUR APP",
+                text: `Please use the following link within the next 10 minutes to activate your account on YOUR APP: ${baseUrl}/api/user/verify/${user._id}/${secretCode}`,
+                html: `<p>Please use the following link within the next 10 minutes to activate your account on YOUR APP: <strong><a href="${baseUrl}/api/user/verify/${user._id}/${secretCode}" target="_blank">Verify link</a></strong></p>`,
+            };
+            await emailService.sendMail(data);
+
+            res.status(200).json({ message: "success" });
+        }
+    } catch (err) {
+        console.log(err);
+        next(err);
+    }
+}
+
+exports.verifyMail = async function (req, res, next) {
+    try {
+        const user = await User.findById(req.params.userId);
+        const response = await SecretCode.findOne({
+            email: user.email,
+            code: req.params.secretCode,
+        });
+
+        if (!user) {
+            res.status(200).json({message: "Provided information for verification is incorrect. Please check your link."})
+        } else {
+            if (!response) {
+                return res.status(200).json({message: "Provided information for verification is incorrect. Please check your link."})
+            }
+            await User.updateOne(
+                { email: user.email },
+                { isVerified: true }
+            );
+            await SecretCode.deleteMany({ email: user.email });
+
+            // let redirectPath;
+
+            // if (process.env.NODE_ENV == "production") {
+            //     redirectPath = `${req.protocol}://${req.get(
+            //         "host"
+            //     )}account/verified`;
+            // } else {
+            //     redirectPath = `http://127.0.0.1:8080/account/verified`;
+            // }
+
+            // res.redirect(redirectPath);
+            res.status(200).json({message: "success"});
+        }
+    } catch (err) {
+        console.log(err);
+        next(err);
+    }
+}
+
+exports.sendSecretCode = async function (req,res, next) {
+    if (!req.body.email) { 
+        res.status(200).json({ message: "Please provide your email address!" });
+    } else {
+        try {
+            const user = await User.findOne({ email: req.body.email });
+
+            if (!user || !user.isVerified) { 
+                res.status(200).json({ message: "The provided email address is not registered!" });
+            } else {
+                const secretCode = cryptoRandomString({
+                    length: 6,
+                });
+                const newCode = new SecretCode({
+                    code: secretCode,
+                    email: req.body.email,
+                });
+                await newCode.save();
+
+                const data = {
+                    from: config.EMAIL_USERNAME,
+                    to: user.email,
+                    subject: "Your Password Reset Code for YOUR APP",
+                    text: `Please use the following code within the next 10 minutes to reset your password on YOUR APP: ${secretCode}`,
+                    html: `<p>Please use the following code within the next 10 minutes to reset your password on YOUR APP: <strong>${secretCode}</strong></p>`,
+                };
+                console.log(secretCode);
+                await emailService.sendMail(data);
+
+                res.status(200).json({message: "success"});
+            }
+        } catch (err) {
+            next(err);
+        }
+    }
+}
+
+exports.verifySecretCode = async function (req, res, next) {
+    const { email, password, password2, code } = req.body;
+
+    if (!email || !password || !password2 || !code) {
+        return res.status(200).json({message: "Please fill in all fields"});
+    }
+    if (password != password2) {
+        return res.status(200).json({message: "Passwords do not match"});
+    }
+    
+    // if (
+    //     !password.match(
+    //         /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{6,}$/
+    //     )
+    // ) {
+    //     errors.push({
+    //         msg:
+    //             "Your password must be at least 6 characters long and contain a lowercase letter, an uppercase letter, a numeric digit and a special character.",
+    //     });
+    // }
+    try {
+        const response = await SecretCode.findOne({ email, code });
+
+
+        if (!response) {
+            return res.status(200).json({message: "The entered code is not correct. Please make sure to enter the code in the requested time interval."});
+        } else {
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(req.body.password, salt);
+            await User.updateOne({ email }, { password: hashedPassword });
+            await SecretCode.deleteOne({ email, code });
+            res.status(200).json({message: "success"});
+        }
+    } catch (err) {
+        next(err);
+    }
 }
 
 exports.getUserByRole = function (role) {

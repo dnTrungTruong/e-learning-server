@@ -6,6 +6,8 @@ const router = express.Router();
 
 router.get('/', CourseController.getCourseList)
 
+router.get('/search/:keyword', CourseController.searchCourse)
+
 router.get('/:id', CourseController.getCourseDetails)
 
 router.post('/',

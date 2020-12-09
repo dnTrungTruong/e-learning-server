@@ -6,7 +6,9 @@ const SubjectSchema = new mongoose.Schema({
     type: String,
     required: true
   }
-});
+}//,
+  // {collation: { locale: 'en', strength: 2 }}
+);
 
 //use schema for 'subject' collection schema
 const Subject = mongoose.model('Subject', SubjectSchema);

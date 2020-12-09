@@ -31,7 +31,11 @@ const UserSchema = new mongoose.Schema({
   }],
   createdCourses: [{
     type: mongoose.Schema.Types.ObjectId
-  }]
+  }],
+  isVerified: {
+    type: Boolean,
+    default: false
+  }
 });
 
 //use schema for 'User' collection schema

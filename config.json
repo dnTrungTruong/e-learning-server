@@ -3,5 +3,10 @@
     "secret": "DAMNGUYENTRUNGTRUONG20051999",
     "CLOUD_NAME": "ducnguyen14665",
     "CLOUDINARY_API_KEY": "483961554886892",
-    "CLOUDINARY_API_SECRET": "RRZ0hK2l5thE9tDbMnJf11zUc-M"
+    "CLOUDINARY_API_SECRET": "RRZ0hK2l5thE9tDbMnJf11zUc-M",
+    "EMAIL_HOST": "smtp.gmail.com",
+    "EMAIL_PORT": "587",
+    "EMAIL_SERVICE": "gmail",
+    "EMAIL_USERNAME": "nhhduc14665@gmail.com",
+    "EMAIL_PW": "huuDuc123"
 }
