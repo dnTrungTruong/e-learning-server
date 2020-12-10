@@ -66,7 +66,57 @@ exports.getCourseList = function (req, res, next) {
         }
     })
 }
-// This function need configuration
+
+exports.getCourseListByStatus = function (req, res, next) {
+    Course.find({status: req.params.status}, function (err, result) {
+        if (err) {
+            next(err);
+        }
+        else {
+            res.status(200).json({ message: "success", data: result });
+        }
+    })
+}
+
+exports.submitCourseForApproval = function (req, res, next) {
+    const courseId = req.params.id;
+    Course.findById(courseId, function (err, course) {
+        if (err) {
+            next(err);
+        }
+        else {
+            if (!course) {
+                return res.status(200).json({message: "Course provided is not exist"});
+            }
+            if (course.status) {
+                return res.status(200).json({message: "This course has already been submitted for approval"})
+            }
+            course.status = "Pending"
+            course.save(function (err) {
+                if (err) {
+                    next(err);
+                }
+                else {
+                    res.status(200).json({message: "success"});
+                }
+            })
+        }
+    })
+}
+
+exports.approveCourse = function (req, res, next) {
+    const courseId = req.params.id;
+    Course.updateOne({_id: courseId}, {status: "Approved"}, function (err) {
+        if(err) {
+            next(err);
+        }
+        else {
+            res.status(200).json({message: "success"})
+        }
+    })
+}
+
+// This function need configuration - This is old function have already added new one below
 // exports.getCourseListbySubject = function(req, res, next) {
 //     Course.find({subject : req.params.sub_id}, function(err, result) {
 //         if (err) {

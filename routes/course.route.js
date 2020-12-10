@@ -8,11 +8,24 @@ router.get('/', CourseController.getCourseList)
 
 router.get('/search/:keyword', CourseController.searchCourse)
 
+router.get('/list/:status', 
+Authorization.authorize([Role.Moderator, Role.Admin]),
+CourseController.getCourseListByStatus)
+
 router.get('/:id', CourseController.getCourseDetails)
 
 router.post('/',
 Authorization.authorize([Role.Instructor, Role.Moderator, Role.Admin]),
 CourseController.createCourse)
+
+router.put('/submit/:id',
+Authorization.authorize(),
+ Authorization.authorizeCreatedCourse(),
+CourseController.submitCourseForApproval)
+
+router.put('/approve/:id',
+Authorization.authorize([Role.Moderator, Role.Admin]),
+CourseController.approveCourse)
 
 router.put('/:id',
 Authorization.authorize([Role.Instructor, Role.Moderator, Role.Admin]),

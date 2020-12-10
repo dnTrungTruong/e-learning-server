@@ -28,7 +28,11 @@ const CourseSchema = new mongoose.Schema({
   },
   price: {
       type: Number,
-      required: true  },
+      required: true  
+  },
+  status: {
+    type: String
+  },
   sections: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Section'
