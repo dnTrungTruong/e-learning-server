@@ -8,5 +8,9 @@
     "EMAIL_PORT": "587",
     "EMAIL_SERVICE": "gmail",
     "EMAIL_USERNAME": "nhhduc14665@gmail.com",
-    "EMAIL_PW": "huuDuc123"
+    "EMAIL_PW": "huuDuc123",
+    "GOOGLE_CLIENT_ID": "2016644594-n7rovmv8ddeid9sbnu9rojie77kku78k.apps.googleusercontent.com",
+    "GOOGLE_CLIENT_SECRET": "LUcN2kizq672S0VauTkdcToe",
+    "FACEBOOK_APP_ID": "2776690545964584",
+    "FACEBOOK_APP_SECRET": "ca1d41e741f680d4f9033ebe3b39c04c"
 }

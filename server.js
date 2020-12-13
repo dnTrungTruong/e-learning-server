@@ -6,17 +6,24 @@ const cors = require('cors');
 const errorHandler = require('./helpers/error-handler');
 const routes = require('./routes');
 const config = require('config.json');
+const passport = require('passport');
+require('./helpers/passport-setup')
+
 
 //add config to url encoded & CORS
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cors());
 
+
 //api route
 app.use("/api", routes)
 
 //use global error handler
 app.use(errorHandler)
+
+
+
 
 //connect to MongoDB
 mongoose.connect('mongodb://127.0.0.1:27017/e_learning',//  config.connectionString,

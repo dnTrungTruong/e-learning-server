@@ -17,5 +17,6 @@ function errorHandler(err, req, res, next) {
     }
 
     // default to 500 server error
+    console.log(err);
     return res.status(200).json({ message: err.message });
 }

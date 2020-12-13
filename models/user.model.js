@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Role = require('../helpers/role');
 
 //define user collection schema in MongoDB
 const UserSchema = new mongoose.Schema({
@@ -10,7 +11,7 @@ const UserSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true,
+    // required: true //comment this because of using passportjs
   },
   firstname: {
     type: String
@@ -24,6 +25,7 @@ const UserSchema = new mongoose.Schema({
   },
   role: {
     type: String,
+    default: Role.Student,
     required: true
   },
   enrolledCourses: [{

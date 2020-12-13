@@ -118,6 +118,24 @@ exports.authenticate = async function (req, res, next) {
 
 }
 
+exports.authenticateWithPassport = async function (req, res, next) {
+
+    try {
+        const user = req.user;
+        const userData = user._doc;
+        const token = jwt.sign({ sub: userData._id, role: userData.role }, config.secret);
+        const { password, __v, ...userWithoutPassword } = userData;
+        const authData = {
+            'userdata': userWithoutPassword,
+            'token': token
+        };
+        res.status(200).json({message: "success", data: authData});
+    }
+    catch (err) {
+        next(err)
+    }
+}
+
 //get user info
 exports.getUserInfo = function (req, res, next) {
     User.findById(req.params.id, function (err, user) {
