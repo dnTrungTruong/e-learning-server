@@ -239,7 +239,6 @@ exports.sendVerifyMail = async function (req, res ,next) {
             res.status(200).json({ message: "success" });
         }
     } catch (err) {
-        console.log(err);
         next(err);
     }
 }
@@ -278,7 +277,6 @@ exports.verifyMail = async function (req, res, next) {
             res.status(200).json({message: "success"});
         }
     } catch (err) {
-        console.log(err);
         next(err);
     }
 }

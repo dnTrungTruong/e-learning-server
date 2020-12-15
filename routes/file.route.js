@@ -23,7 +23,7 @@ FileController.uploadDoc)
 
 
 //router.put('/:id', FileController.editResources)
-router.delete('/image/', FileController.deleteImage)
+router.delete('/image/', FileController.deleteImage) //must provide public_id in body because of [DELETE] /image/course_img/public_id not work
 
 router.delete('/:section_id/:name',
 Authorization.authorize([Role.Instructor, Role.Moderator, Role.Admin]),

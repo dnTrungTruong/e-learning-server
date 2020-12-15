@@ -68,7 +68,8 @@ exports.uploadImage = (req, res) => {
             //         "original_extension": "JPG"
             //     }
             // }
-              return res.status(200).json({message: "success", data: image.public_id});
+            const imageData = {img: image.public_id, img_url: image.url};
+              return res.status(200).json({message: "success", data: imageData});
           }
       )
         //Need to check if file exists (not coded yet) and send message

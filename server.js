@@ -26,7 +26,7 @@ app.use(errorHandler)
 
 
 //connect to MongoDB
-mongoose.connect('mongodb://127.0.0.1:27017/e_learning',//  config.connectionString,
+mongoose.connect( config.connectionString,//'mongodb://127.0.0.1:27017/e_learning',
   {
     useNewUrlParser: true,
     useUnifiedTopology: true

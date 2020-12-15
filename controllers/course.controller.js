@@ -5,6 +5,9 @@ const Subject = require('../models/subject.model')
 exports.createCourse = function (req, res, next) {
     const course = new Course(req.body);
 
+    //The instructor will be the user who send the request
+    course.instructor = res.locals.user.sub;
+
     course.save(function (err, createdCourse) {
         if (err) {
             next(err)
@@ -171,6 +174,8 @@ exports.editCourse = function (req, res, next) {
             course.subject = req.body.subject || course.subject;
             course.description = req.body.description || course.description;
             course.price = req.body.price || course.price;
+            course.img = req.body.img || course.img;
+            course.img_url = req.body.img_url || course.img_url;
 
             course.save(function (err, updatedCourse) {
                 if (err) {
