@@ -4,87 +4,30 @@ const path = require('path');
 const fs = require('fs');
 const cloudinary = require('cloudinary').v2;
 const config = require('../config.json')
+const s3 = require('../helpers/s3')
 
 const resourcesDir = "/resources/";
 const __basedir = path.resolve();
 const baseUrl = "http://localhost:3000/api/file/";
+const awsS3Url = "https://e-learning-10r825s36vuq028g5csk.s3.amazonaws.com/";
 
 
 exports.uploadImage = (req, res) => {
-  fs.mkdir(__basedir + "/temp/", { recursive: true }, err => {
-    if (err) {
-      return res.status(200).json({message: err.message})
-    } 
-    else {
-      upload.uploadImage(req, res)
+  upload.uploadImage(req, res)
       .then(() => {
         if (req.file == undefined) {
-          return res.status(200).send({ message: "Please upload a image!" });
+          return res.status(200).json({ message: "Please upload a image!" });
         }
-        cloudinary.config({
-          cloud_name: config.CLOUD_NAME,
-          api_key: config.CLOUDINARY_API_KEY,
-          api_secret: config.CLOUDINARY_API_SECRET
-        });
-
-        const path = req.file.path;
-
-        cloudinary.uploader.upload(
-          path,
-          { folder: `course_image/`, tags: `courseimage` }, 
-          function (err, image) {
-              if (err) return res.json({message: err});
-              // remove file from server, log if failed deleting
-              fs.unlink(path, function (err) {
-                if (err) {
-                  console.log(err)
-                }
-              });
-              // return image details
-              //below are respond from cloudinary
-            //   {
-            //     "message": "success",
-            //     "data": {
-            //         "asset_id": "8abdf93aa85fe6308c0a98d227af99f9",
-            //         "public_id": "course_image/ttuofo6jfxst4t82lbw7",
-            //         "version": 1607394408,
-            //         "version_id": "50b25c8eb39237050b332cedaa5d11dd",
-            //         "signature": "5a08818736fa96694a6d9eb1f7039440963b5fc6",
-            //         "width": 241,
-            //         "height": 145,
-            //         "format": "jpg",
-            //         "resource_type": "image",
-            //         "created_at": "2020-12-08T02:26:48Z",
-            //         "tags": [
-            //             "courseimage"
-            //         ],
-            //         "bytes": 18813,
-            //         "type": "upload",
-            //         "etag": "6e95880b31a524d2bed25ac36eda8d43",
-            //         "placeholder": false,
-            //         "url": "http://res.cloudinary.com/ducnguyen14665/image/upload/v1607394408/course_image/ttuofo6jfxst4t82lbw7.jpg",
-            //         "secure_url": "https://res.cloudinary.com/ducnguyen14665/image/upload/v1607394408/course_image/ttuofo6jfxst4t82lbw7.jpg",
-            //         "original_filename": "1607394407183",
-            //         "original_extension": "JPG"
-            //     }
-            // }
-            const imageData = {img: image.public_id, img_url: image.url};
-              return res.status(200).json({message: "success", data: imageData});
-          }
-      )
-        //Need to check if file exists (not coded yet) and send message
-        // return res.status(200).send({
-        //   message: "success"
-        // });
+        //reponse image url
+        return res.status(200).json({ message: "success", data: req.file.location });
       })
       .catch((err) => {
-        return res.status(200).send({
+        return res.status(200).json({
           message: `Could not upload the file: ${err}`,
         });
       })
-    }
-  });
 }
+
 exports.deleteImage = (req, res) => {
   cloudinary.config({
     cloud_name: config.CLOUD_NAME,
@@ -92,13 +35,62 @@ exports.deleteImage = (req, res) => {
     api_secret: config.CLOUDINARY_API_SECRET
   });
   cloudinary.uploader.destroy(req.body.public_id, function(err, result) {
-    console.log(result);
      if (err) {
        return res.status(200).json({message: err});
      }
      else {
        return res.status(200).json({message: "success"});
      }
+    });
+}
+
+//AWS S3
+exports.upload = (req, res) => {
+  upload.upload(req, res)
+  .then(() => {
+    if (req.file == undefined) {
+      return res.status(200).send({ message: "Please upload a file!" });
+    }
+    return res.status(200).json({
+      message: "success"
+    });
+  })
+  .catch((err) => {
+    if (err.code == "LIMIT_FILE_SIZE") {
+      return res.status(200).send({
+        message: "File size cannot be larger than 20MB!",
+      });
+    }
+
+    return res.status(200).send({
+      message: `Could not upload the file: ${err}`,
+    });
+  });
+}
+
+exports.uploadVideo = (req, res) => {
+  var fileurls = [];
+
+  const fileName = "course_videos/" + req.params.section_id + "/" + Date.now() + "-" + req.query.fileName;
+    const params = {
+        Bucket: config.AWS_BUCKET_NAME,
+        Key: fileName,
+        Expires: 60 * 60, // Time untill presigned URL is valid
+        ACL: 'public-read',
+        ContentType: req.query.fileType
+    };
+
+    s3.getSignedUrl('putObject', params, function async(err, url) {
+        if (err) {
+            return res.status(200).json({
+                message: err
+            });
+        }
+        else {
+            fileurls[0] = url;
+            fileurls[1] = awsS3Url + encodeURI(fileName);
+            return res.status(200).json({  message: 'success', data: fileurls });
+        }
     });
 }
 
@@ -134,39 +126,70 @@ exports.uploadDoc = (req, res) => {
 };
 
 exports.getListFiles = (req, res) => {
-  const directoryPath = __basedir + resourcesDir + req.params.section_id;
-
-  fs.readdir(directoryPath, function (err, files) {
-    if (err) {
-      return res.status(200).send({
-        message: "Unable to scan files!",
-      });
+  const params = {
+    Bucket: config.AWS_BUCKET_NAME,
+    Prefix: "course_resources/" + req.params.section_id + '/'
+  }
+ 
+  var keys = [];
+  s3.listObjectsV2(params, (err, data) => {
+        if (err) {
+        res.status(200).json({message: err.message});
+        } else {
+            var contents = data.Contents;
+            contents.forEach(function (content) {
+                keys.push(content.Key);
+        });
+        res.status(200).json({message: "sucess", data: keys});
     }
-
-    let fileInfos = [];
-
-    files.forEach((file) => {
-      fileInfos.push({
-        name: file,
-        url: "http://localhost:3000/api/file/" + req.params.section_id + "/" + file,
-      });
-    });
-
-    res.status(200).json({message: "success", data: fileInfos});
   });
+  // const directoryPath = __basedir + resourcesDir + req.params.section_id;
+
+  // fs.readdir(directoryPath, function (err, files) {
+  //   if (err) {
+  //     return res.status(200).send({
+  //       message: "Unable to scan files!",
+  //     });
+  //   }
+
+  //   let fileInfos = [];
+
+  //   files.forEach((file) => {
+  //     fileInfos.push({
+  //       name: file,
+  //       url: "http://localhost:3000/api/file/" + req.params.section_id + "/" + file,
+  //     });
+  //   });
+
+  //   res.status(200).json({message: "success", data: fileInfos});
+  // });
 };
 
 exports.download = (req, res) => {
-  const fileName = req.params.name;
-  const directoryPath = __basedir + resourcesDir + req.params.section_id + "/";
+  const params = {
+    Bucket: config.AWS_BUCKET_NAME,
+    Key: req.params.section_id + '/' +req.params.filename
+  }
+ 
+  res.setHeader('Content-Disposition', 'attachment');
+ 
+  s3.getObject(params)
+    .createReadStream()
+      .on('error', function(err){
+        console.log("get");
+        console.log(req.params);
+        res.status(200).json({message: err.message});
+    }).pipe(res);
+  // const fileName = req.params.name;
+  // const directoryPath = __basedir + resourcesDir + req.params.section_id + "/";
 
-  res.download(directoryPath + fileName, fileName, (err) => {
-    if (err) {
-      res.status(200).send({
-        message: "Could not download the file. " + err,
-      });
-    }
-  });
+  // res.download(directoryPath + fileName, fileName, (err) => {
+  //   if (err) {
+  //     res.status(200).send({
+  //       message: "Could not download the file. " + err,
+  //     });
+  //   }
+  // });
 };
 
 exports.delete = (req, res) => {

@@ -60,14 +60,17 @@ exports.getCourseDetails = function (req, res, next) {
 }
 
 exports.getCourseList = function (req, res, next) {
-    Course.find(function (err, result) {
-        if (err) {
-            next(err);
-        }
-        else {
-            res.status(200).json({ message: "success", data: result });
-        }
-    })
+    Course.find(//)
+        //.populate('instructor', 'firstname lastname')
+        //.exec(
+            function (err, result) {
+            if (err) {
+                next(err);
+            }
+            else {
+                res.status(200).json({ message: "success", data: result });
+            }
+        })
 }
 
 exports.getCourseListByStatus = function (req, res, next) {
