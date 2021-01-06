@@ -60,21 +60,36 @@ exports.getCourseDetails = function (req, res, next) {
 }
 
 exports.getCourseList = function (req, res, next) {
-    Course.find(//)
-        //.populate('instructor', 'firstname lastname')
-        //.exec(
+    Course.find({ status: "Approved" },)
+        .populate('instructor', 'firstname lastname')
+        .exec(
             function (err, result) {
+                if (err) {
+                    next(err);
+                }
+                else {
+                    res.status(200).json({ message: "success", data: result });
+                }
+            })
+}
+
+exports.getHotCourses = function (req, res, next) {
+    Course.find({ status: "Approved" },//)
+        //.exec(
+        function (err, result) {
             if (err) {
                 next(err);
             }
             else {
-                res.status(200).json({ message: "success", data: result });
+                //Need to implement hot search not random
+                let sortedResult = result.sort(() => 0.5 - Math.random()).slice(0, 4);
+                res.status(200).json({ message: "success", data: sortedResult });
             }
         })
 }
 
 exports.getCourseListByStatus = function (req, res, next) {
-    Course.find({status: req.params.status}, function (err, result) {
+    Course.find({ status: req.params.status }, function (err, result) {
         if (err) {
             next(err);
         }
@@ -92,10 +107,10 @@ exports.submitCourseForApproval = function (req, res, next) {
         }
         else {
             if (!course) {
-                return res.status(200).json({message: "Course provided is not exist"});
+                return res.status(200).json({ message: "Course provided is not exist" });
             }
             if (course.status) {
-                return res.status(200).json({message: "This course has already been submitted for approval"})
+                return res.status(200).json({ message: "This course has already been submitted for approval" })
             }
             course.status = "Pending"
             course.save(function (err) {
@@ -103,7 +118,7 @@ exports.submitCourseForApproval = function (req, res, next) {
                     next(err);
                 }
                 else {
-                    res.status(200).json({message: "success"});
+                    res.status(200).json({ message: "success" });
                 }
             })
         }
@@ -112,12 +127,12 @@ exports.submitCourseForApproval = function (req, res, next) {
 
 exports.approveCourse = function (req, res, next) {
     const courseId = req.params.id;
-    Course.updateOne({_id: courseId}, {status: "Approved"}, function (err) {
-        if(err) {
+    Course.updateOne({ _id: courseId }, { status: "Approved" }, function (err) {
+        if (err) {
             next(err);
         }
         else {
-            res.status(200).json({message: "success"})
+            res.status(200).json({ message: "success" })
         }
     })
 }
@@ -135,36 +150,60 @@ exports.approveCourse = function (req, res, next) {
 // }
 
 exports.searchCourse = function (req, res, next) {
-    Subject.findOne({ name: { "$regex": req.params.keyword, "$options": "i" } }, function (err, subjectResult) {
-        if (err) {
-            next(err);
-        }
-        else {
-            if (subjectResult) {
-                Course.find({
-                    $or: [{ name: { "$regex": req.params.keyword, "$options": "i" } }, { subject: subjectResult._id }] },
-                    function (err, result) {
-                        if (err) {
-                            next(err);
-                        }
-                        else {
-                            res.status(200).json({ message: "success", data: result });
-                        }
-                    })
+    if (req.params.keyword) {
+        Subject.findOne({ name: { "$regex": req.params.keyword, "$options": "i" } }, function (err, subjectResult) {
+            if (err) {
+                next(err);
             }
             else {
-                Course.find({name: { "$regex": req.params.keyword, "$options": "i" } }, 
-                    function (err, result) {
-                        if (err) {
-                            next(err);
-                        }
-                        else {
-                            res.status(200).json({ message: "success", data: result });
-                        }
-                    })
+                if (subjectResult) {
+                    Course.find()
+                        .and([
+                            { status: "Approved" },
+                            { $or: [{ name: { "$regex": req.params.keyword, "$options": "i" } }, { subject: subjectResult._id }] }
+                        ])
+                        .populate('instructor', 'firstname lastname')
+                        .exec(function (err, result) {
+                            if (err) {
+                                next(err);
+                            }
+                            else {
+                                return res.status(200).json({ message: "success", data: result });
+                            }
+                        })
+                }
+                else {
+                    Course.find()
+                        .and([
+                            { status: "Approved" },
+                            { name: { "$regex": req.params.keyword, "$options": "i" } }
+                        ])
+                        .populate('instructor', 'firstname lastname')
+                        .exec(function (err, result) {
+                            if (err) {
+                                next(err);
+                            }
+                            else {
+                                return res.status(200).json({ message: "success", data: result });
+                            }
+                        })
+                }
             }
-        }
-    })
+        })
+    }
+    else {
+        Course.find({ status: "Approved" },)
+        .populate('instructor', 'firstname lastname')
+        .exec(
+            function (err, result) {
+                if (err) {
+                    next(err);
+                }
+                else {
+                    return res.status(200).json({ message: "success", data: result });
+                }
+            })
+    }
 }
 
 exports.editCourse = function (req, res, next) {

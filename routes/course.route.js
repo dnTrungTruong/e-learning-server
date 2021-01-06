@@ -6,7 +6,9 @@ const router = express.Router();
 
 router.get('/', CourseController.getCourseList)
 
-router.get('/search/:keyword', CourseController.searchCourse)
+router.get('/hot', CourseController.getHotCourses)
+
+router.get('/search/:keyword?', CourseController.searchCourse)
 
 router.get('/list/:status', 
 Authorization.authorize([Role.Moderator, Role.Admin]),
