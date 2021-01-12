@@ -307,7 +307,6 @@ exports.sendSecretCode = async function (req,res, next) {
                     text: `Please use the following code within the next 10 minutes to reset your password on YOUR APP: ${secretCode}`,
                     html: `<p>Please use the following code within the next 10 minutes to reset your password on YOUR APP: <strong>${secretCode}</strong></p>`,
                 };
-                console.log(secretCode);
                 await emailService.sendMail(data);
 
                 res.status(200).json({message: "success"});

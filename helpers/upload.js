@@ -70,11 +70,11 @@ let imageStorage = multer.diskStorage({
 //upload function
 
 let upload = multer({
-  storage: s3DocStorage//,
-  // fileFilter: function (_req, file, cb) { checkFileType(file, cb); },
-  // limits: {
-  //     fileSize: maxSize // we are allowing only 5 MB files
-  // }
+  storage: s3DocStorage,
+   fileFilter: function (_req, file, cb) { checkFileType(file, cb); },
+   limits: {
+       fileSize: maxSize 
+   }
 }).single("file");
 
 
