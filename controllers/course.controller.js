@@ -157,17 +157,6 @@ exports.approveCourse = function (req, res, next) {
     })
 }
 
-// This function need configuration - This is old function have already added new one below
-// exports.getCourseListbySubject = function(req, res, next) {
-//     Course.find({subject : req.params.sub_id}, function(err, result) {
-//         if (err) {
-//             next(err);
-//         }
-//         else {
-//             res.status(200).json({ data: result });
-//         }
-//     })
-// }
 
 exports.searchCourse = function (req, res, next) {
     if (req.params.keyword) {
