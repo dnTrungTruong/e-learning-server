@@ -1,5 +1,6 @@
 //VALIDATION
 const Joi = require('@hapi/joi');
+const mongoose = require('mongoose');
 
 exports.validation = (schema, property) => { 
     return (req, res, next) => { 
@@ -15,3 +16,14 @@ exports.validation = (schema, property) => {
      res.status(200).json({ message: errorMessage  }) } 
     } 
   } 
+
+exports.isParamsValidObjectIdCasting = function()  {
+  return [
+    (req, res, next) => {
+      if (!mongoose.isValidObjectId(req.params.id)) {
+        return res.status(200).json({message: "Provided id is not a valid ObjectId"});
+      }
+      next()
+    }
+  ]
+}

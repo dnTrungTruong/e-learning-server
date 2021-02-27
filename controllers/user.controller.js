@@ -177,7 +177,7 @@ exports.editInfo = function (req, res, next) {
                 })
             }
             else {
-                res.status(200).json({ message: "No result" });
+                res.status(200).json({ message: "Provided user is not valid" });
             }
             
         }
@@ -191,16 +191,22 @@ exports.enrollCourse = function (req, res ,next) {
             next(err);
         }
         else {
-            user.enrolledCourses.push(req.params.course_id);
+            if (user) {
+                user.enrolledCourses.push(req.params.course_id);
             
-            user.save(function (err, updatedUser) {
-                if (err) {
-                    next(err);
-                }
-                else {
-                    res.status(200).json({message: "success", data: updatedUser})
-                }
-            })
+                user.save(function (err, updatedUser) {
+                    if (err) {
+                        next(err);
+                    }
+                    else {
+                        res.status(200).json({message: "success", data: updatedUser})
+                    }
+                })
+            }
+            else {
+                res.status(200).json({ message: "Provided user is not valid" });
+            }
+            
         }
     })
 }
@@ -379,45 +385,3 @@ exports.getUserByRole = function (role) {
     ]
     
 }
-
-// exports.getStudentList = function (req, res, next) {
-//     User.find({ role: Role.Student }, function (err, result) {
-//         if (err) {
-//             next(err);
-//         }
-//         else {
-//             if (result) {
-//                 result.forEach(removeUserPassword)
-//                 res.status(200).json({message: "success", data: result });
-//             }
-//             else {
-//                 res.status(404).json({ message: "No result" });
-//             }
-//         }
-//     })
-// }
-
-// exports.getInstructorList = function (req, res, next) {
-//     User.find({ role: Role.Instructor }, function (err, result) {
-//         if (err) {
-//             next(err);
-//         }
-//         else {
-//             result.forEach(removeUserPassword)
-//             res.status(200).json({message: "success", data: result });
-//         }
-//     })
-// }
-
-// exports.getModeratorList = function (req, res, next) {
-//     User.find({ role: Role.Moderator }, function (err, result) {
-//         if (err) {
-//             next(err);
-//         }
-//         else {
-//             result.forEach(removeUserPassword)
-//             res.status(200).json({message: "success", data: result });
-//         }
-//     })
-// }
-

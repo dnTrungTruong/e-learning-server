@@ -28,21 +28,21 @@ exports.uploadImage = (req, res) => {
       })
 }
 
-exports.deleteImage = (req, res) => {
-  cloudinary.config({
-    cloud_name: config.CLOUD_NAME,
-    api_key: config.CLOUDINARY_API_KEY,
-    api_secret: config.CLOUDINARY_API_SECRET
-  });
-  cloudinary.uploader.destroy(req.body.public_id, function(err, result) {
-     if (err) {
-       return res.status(200).json({message: err});
-     }
-     else {
-       return res.status(200).json({message: "success"});
-     }
-    });
-}
+// exports.deleteImage = (req, res) => {
+//   cloudinary.config({
+//     cloud_name: config.CLOUD_NAME,
+//     api_key: config.CLOUDINARY_API_KEY,
+//     api_secret: config.CLOUDINARY_API_SECRET
+//   });
+//   cloudinary.uploader.destroy(req.body.public_id, function(err, result) {
+//      if (err) {
+//        return res.status(200).json({message: err});
+//      }
+//      else {
+//        return res.status(200).json({message: "success"});
+//      }
+//     });
+// }
 
 //AWS S3
 exports.upload = (req, res) => {

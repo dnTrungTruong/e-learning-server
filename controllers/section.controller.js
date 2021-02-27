@@ -43,6 +43,9 @@ exports.createSection = function(req, res, next){
                     next (err);
                 }
                 else {
+                    if(!result) {
+                        return res.status(200).json({ message: "Provided course is not valid"}); 
+                    }
                     //insert or append to sections list depend on index
                     if (req.params.index) {
                         result.sections.splice(req.params.index, 0, createdSection._id);
@@ -72,6 +75,9 @@ exports.getSectionInfo = function (req, res, next) {
             next(err);
         }
         else {
+            if(!section) {
+                return res.status(200).json({ message: "No result"}); 
+            }
             res.status(200).json({message: "success", data: section });
         }
     });
@@ -85,6 +91,9 @@ exports.getSectionList = function (req, res ,next){
             next(err);
         }
         else {
+            if(!result) {
+                return res.status(200).json({ message: "No result"}); 
+            }
             res.status(200).json({message: "success", data: result.sections });
         }
     })
@@ -97,6 +106,9 @@ exports.editSection = function (req, res ,next) {
             next(err);
         }
         else {
+            if(!section) {
+                return res.status(200).json({ message: "Provided section is not valid"}); 
+            }
             section.name = req.body.name || section.name;
             
             section.save(function (err, updatedSection) {
@@ -117,11 +129,17 @@ exports.deleteSection = function(req, res, next){
             next(err);
         }
         else {
+            if(!section) {
+                return res.status(200).json({ message: "Provided section is not valid"}); 
+            }
             Course.findById(section.course, function (err, result) {
                 if (err) {
                     next(err);
                 }
                 else { //Delete section in the section list first
+                    if(!result) {
+                        return res.status(200).json({ message: "Provided course is not valid"}); 
+                    }
                     result.sections.splice(result.sections.indexOf(section.id), 1)
                     result.save(function (err) {
                         if (err) {

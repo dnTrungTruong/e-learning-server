@@ -10,6 +10,9 @@ exports.createQuiz = function (req, res, next) {
             next(err);
         }
         else {
+            if(!result) {
+                return res.status(200).json({ message: "Provided section is not valid"}); 
+            }
             //Check if section have a quiz
             if (result.quiz) {
                 return res.status(200).json({ message: "Already have a quiz in section." })
@@ -46,6 +49,9 @@ exports.getQuiz = function (req, res, next) {
                 next(err);
             }
             else {
+                if(!quiz) {
+                    return res.status(200).json({ message: "No result"}); 
+                }
                 //shuffle the questions before sending back to client
                 const shuffledQuestions = quiz.questions.sort(() => Math.random() - 0.5);
                 quiz.questions = shuffledQuestions;
@@ -64,6 +70,9 @@ exports.submitQuiz = function (req, res, next) {
                 next(err);
             }
             else {
+                if(!quiz) {
+                    return res.status(200).json({ message: "Provided quiz is not valid"}); 
+                }
                 totalQuestions = quiz.questions.length;
                 correctAnswer = 0;
                 quiz.questions.forEach(function (quizQuestion) {
@@ -95,6 +104,9 @@ exports.editQuiz = function (req, res, next) {
             next(err);
         }
         else {
+            if(!quiz) {
+                return res.status(200).json({ message: "Provided quiz is not valid"}); 
+            }
             quiz.name = req.body.name || quiz.name;
             quiz.questions = req.body.questions || quiz.questions;
 
@@ -116,11 +128,18 @@ exports.deleteQuiz = function (req, res, next) {
             next(err);
         }
         else {
+            if(!quiz) {
+                return res.status(200).json({ message: "Provided quiz is not valid"}); 
+            }
             Section.findById(quiz.section, function (err, result) {
                 if (err) {
                     next(err);
                 }
-                else { //Delete quiz in the section first
+                else { 
+                    if(!result) {
+                        return res.status(200).json({ message: "Provided quiz is not valid"}); 
+                    }
+                    //Delete quiz in the section first
                     result.quiz = undefined;
                     result.save(function (err) {
                         if (err) {

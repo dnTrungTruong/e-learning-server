@@ -19,7 +19,6 @@ router.use('/course', courseRoute)
 router.use('/section', sectionRoute)
 router.use('/lecture', lectureRoute)
 router.use('/quiz', quizRoute)
-//router.use('/resource', resourceRoute) No need at the moment
 router.use('/file', fileRoute)
 
 //export router

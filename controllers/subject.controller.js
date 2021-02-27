@@ -19,6 +19,9 @@ exports.getSubjectInfo = function (req, res, next) {
             next(err);
         }
         else {
+            if (!subject) {
+                return res.status(200).json({message: "No result" });
+            }
             res.status(200).json({message: "success", data: subject });
         }
     });
@@ -30,7 +33,11 @@ exports.getSubjectList = function (req, res ,next){
             next(err);
         }
         else {
+            if (!result) {
+                return res.status(200).json({message: "No result" });
+            }
             res.status(200).json({message: "success", data: result });
+
         }
     })
 }
@@ -42,8 +49,11 @@ exports.editSubject = function (req, res ,next) {
             next(err);
         }
         else {
+            if (!subject) {
+                return res.status(200).json({message: "Provided subject is not valid" });
+            }
             subject.name = req.body.name || subject.name;
-            
+
             subject.save(function (err, updatedSubject) {
                 if (err) {
                     next(err);
@@ -62,6 +72,9 @@ exports.deleteSubject = function(req, res, next){
             next(err);
         }
         else {
+            if (!subject) {
+                return res.status(200).json({message: "Provided subject is not valid" });
+            }
             subject.remove(function (err, deletedSubject) {
                 if (err) {
                     next(err);

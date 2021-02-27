@@ -60,6 +60,9 @@ exports.authorizeCreatedCourse = function () {
                     next(err);
                 }
                 else {
+                    if (!user) {
+                        return res.status(401).json({ message: 'Provided user is not valid'});
+                    }
                     if (user.createdCourses.includes(req.params.id)) {
                         next()
                     }
@@ -80,6 +83,9 @@ exports.authorizeCreatedCourseWithSection = function () {
                     next(err);
                 }
                 else {
+                    if (!user) {
+                        return res.status(200).json({ message: 'Provided user is not valid'});
+                    }
                     // if method is POST then the course_id is in req.body.course
                     if (req.method == "POST") {
                         if (req.body.course) {
@@ -93,9 +99,12 @@ exports.authorizeCreatedCourseWithSection = function () {
                     else {
                         Section.findById(req.params.id, function (err, section) {
                             if (err) {
-                                next(error);
+                                next(err);
                             }
                             else {
+                                if (!section) {
+                                    return res.status(200).json({ message: 'Provided section is not valid'});
+                                }
                                 if (!user.createdCourses.includes(section.course)) {
                                     return res.status(401).json({ message: 'Unauthorized' });
                                 }
@@ -117,6 +126,9 @@ exports.authorizeCreatedCourseWithLecture = function () {
                     next(err);
                 }
                 else {
+                    if (!user) {
+                        return res.status(200).json({ message: 'Provided user is not valid'});
+                    }
                     // if method is POST then the course_id is in req.body.course
                     if (req.method == "POST") {
                         if (req.body.course) {
@@ -133,6 +145,9 @@ exports.authorizeCreatedCourseWithLecture = function () {
                                 next(error);
                             }
                             else {
+                                if (!lecture) {
+                                    return res.status(200).json({ message: 'Provided lecture is not valid'});
+                                }
                                 if (!user.createdCourses.includes(lecture.course)) {
                                     return res.status(401).json({ message: 'Unauthorized' });
                                 }
@@ -154,11 +169,17 @@ exports.authorizeCourseWithFile = function () {
                     next(err);
                 }
                 else {
+                    if (!user) {
+                        return res.status(200).json({ message: 'Provided user is not valid'});
+                    }
                     Section.findById(req.params.section_id, function(err, section) {
                         if (err) {
                             next(err)
                         }
                         else {
+                            if (!section) {
+                                return res.status(200).json({ message: 'Provided section is not valid'});
+                            }
                             if(req.method == "GET") {
                                 if ((res.locals.user.role == Role.Student || res.locals.user.role == Role.Instructor) &&
                                 (!user.enrolledCourses.includes(section.course) && !user.createdCourses.includes(section.course)))

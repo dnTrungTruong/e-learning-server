@@ -15,6 +15,9 @@ exports.createLecture = function(req, res, next){
                     next (err);
                 }
                 else {
+                    if(!result) {
+                        return res.status(200).json({ message: "Provided section is not valid"}); 
+                    }
                     //insert or append to lectures list depend on index
                     if (req.params.index) {
                         result.lectures.splice(req.params.index, 0, createdLecture._id);
@@ -45,6 +48,9 @@ exports.getLectureInfo = function (req, res, next) {
             next(err);
         }
         else {
+            if(!lecture) {
+                return res.status(200).json({ message: "No result"}); 
+            }
             res.status(200).json({message: "success", data: lecture });
         }
     });
@@ -58,6 +64,9 @@ exports.getLectureList = function (req, res ,next){
             next(err);
         }
         else {
+            if(!result) {
+                return res.status(200).json({ message: "No result"}); 
+            }
             res.status(200).json({message: "success", data: result.lectures });
         }
     })
@@ -70,6 +79,9 @@ exports.editLecture = function (req, res ,next) {
             next(err);
         }
         else {
+            if(!lecture) {
+                return res.status(200).json({ message: "Provided lecture is not valid"}); 
+            }
             lecture.name = req.body.name || lecture.name;
             
             lecture.save(function (err, updatedLecture) {
@@ -90,11 +102,18 @@ exports.deleteLecture = function(req, res, next){
             next(err);
         }
         else {
+            if(!lecture) {
+                return res.status(200).json({ message: "Provided lecture is not valid"}); 
+            }
             Section.findById(lecture.section, function (err, result) {
                 if (err) {
                     next(err);
                 }
-                else { //Delete lecture in the lectures list first
+                else { 
+                    if(!result) {
+                        return res.status(200).json({ message: "Provided section is not valid"}); 
+                    }
+                    //Delete lecture in the lectures list first
                     result.lectures.splice(result.lectures.indexOf(lecture.id), 1)
                     result.save(function (err) {
                         if (err) {

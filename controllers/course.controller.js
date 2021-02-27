@@ -18,13 +18,17 @@ exports.createCourse = function (req, res, next) {
                     next(err);
                 }
                 else {
-                    user.createdCourses.push(createdCourse._id)
+                    if (!user) {
+                        return res.status(200).json({ message: "Provided user is not valid"});
+                    }
+                    user.createdCourses.push(createdCourse._id);
+
                     user.save(function (err, updatedUser) {
                         if (err) {
                             next(err);
                         }
                         else {
-                            res.status(200).json({ message: "success", data: createdCourse })
+                            res.status(200).json({ message: "success", data: createdCourse });
                         }
                     })
                 }
@@ -39,6 +43,9 @@ exports.getCourseInfo = function (req, res, next) {
             next(err);
         }
         else {
+            if (!course) {
+                return res.status(200).json({ message: "No result"});
+            }
             res.status(200).json({ message: "success", data: course });
         }
     });
@@ -54,6 +61,9 @@ exports.getCourseDetails = function (req, res, next) {
                 next(err);
             }
             else {
+                if (!course) {
+                    return res.status(200).json({ message: "No result"});
+                }
                 res.status(200).json({ message: "success", data: course });
             }
         });
@@ -68,6 +78,10 @@ exports.getCourseList = function (req, res, next) {
                     next(err);
                 }
                 else {
+                    if (!result) {
+                        return res.status(200).json({ message: "No result"});
+                        
+                    }
                     res.status(200).json({ message: "success", data: result });
                 }
             })
@@ -81,6 +95,9 @@ exports.getHotCourses = function (req, res, next) {
                 next(err);
             }
             else {
+                if (!result) {
+                    return res.status(200).json({ message: "No result"});
+                }
                 //Need to implement hot search not random
                 let sortedResult = result.sort(() => 0.5 - Math.random()).slice(0, 4);
                 res.status(200).json({ message: "success", data: sortedResult });
@@ -94,6 +111,9 @@ exports.getCourseListByStatus = function (req, res, next) {
             next(err);
         }
         else {
+            if (!result) {
+                return res.status(200).json({ message: "No result"}); 
+            }
             res.status(200).json({ message: "success", data: result });
         }
     })
@@ -107,7 +127,7 @@ exports.submitCourseForApproval = function (req, res, next) {
         }
         else {
             if (!course) {
-                return res.status(200).json({ message: "Course provided is not exist" });
+                return res.status(200).json({ message: "Course provided course not exist" });
             }
             if (course.status) {
                 return res.status(200).json({ message: "This course has already been submitted for approval" })
@@ -168,6 +188,9 @@ exports.searchCourse = function (req, res, next) {
                                 next(err);
                             }
                             else {
+                                if(!result) {
+                                    return res.status(200).json({ message: "No result"}); 
+                                }
                                 return res.status(200).json({ message: "success", data: result });
                             }
                         })
@@ -184,6 +207,9 @@ exports.searchCourse = function (req, res, next) {
                                 next(err);
                             }
                             else {
+                                if(!result) {
+                                    return res.status(200).json({ message: "No result"}); 
+                                }
                                 return res.status(200).json({ message: "success", data: result });
                             }
                         })
@@ -200,6 +226,9 @@ exports.searchCourse = function (req, res, next) {
                     next(err);
                 }
                 else {
+                    if(!result) {
+                        return res.status(200).json({ message: "No result"}); 
+                    }
                     return res.status(200).json({ message: "success", data: result });
                 }
             })
@@ -212,6 +241,9 @@ exports.editCourse = function (req, res, next) {
             next(err);
         }
         else {
+            if(!course) {
+                return res.status(200).json({ message: "Provided course is not valid"}); 
+            }
             course.name = req.body.name || course.name;
             course.subject = req.body.subject || course.subject;
             course.description = req.body.description || course.description;
@@ -237,6 +269,9 @@ exports.deleteCourse = function (req, res, next) {
             next(err);
         }
         else {
+            if(!course) {
+                return res.status(200).json({ message: "Provided course is not valid"}); 
+            }
             course.remove(function (err, deletedCourse) {
                 if (err) {
                     next(err);
