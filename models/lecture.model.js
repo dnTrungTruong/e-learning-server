@@ -15,6 +15,10 @@ const LectureSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     required: true
   },
+  resources: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Resource'
+  }],
   url: {
     type: String,
     required: true

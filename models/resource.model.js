@@ -8,20 +8,13 @@ const ResourceSchema = new mongoose.Schema({
   },
   lecture: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Section',
+      ref: 'Lecture',
       required: true
    },
    url: {
        type: String,
        required: true
-   },
-  description: {
-      type: String
-  },
-  type: {
-      type: String,
-      required: true
-  }
+   }
 });
 
 //use schema for 'resource' collection schema

@@ -12,7 +12,7 @@ exports.createLecture = function(req, res, next){
         else { //After saved, add Lecture to the index position lectures list in course by using splice()
             Section.findById(createdLecture.section, function (err, result) {
                 if (err) {
-                    next (err);
+                    next(err);
                 }
                 else {
                     if(!result) {
@@ -83,6 +83,7 @@ exports.editLecture = function (req, res ,next) {
                 return res.status(200).json({ message: "Provided lecture is not valid"}); 
             }
             lecture.name = req.body.name || lecture.name;
+            lecture.url = req.body.url || lecture.url;
             
             lecture.save(function (err, updatedLecture) {
                 if (err) {

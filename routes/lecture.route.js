@@ -7,11 +7,11 @@ const Role = require('../helpers/role')
 const router = express.Router();
 
 router.get('/listbysection/:id', 
-Validation.isParamsValidObjectIdCasting(),
+Validation.areParamsValidObjectIdCasting(),
 LectureController.getLectureList)
 
 router.get('/:id', 
-Validation.isParamsValidObjectIdCasting(),
+Validation.areParamsValidObjectIdCasting(),
 LectureController.getLectureInfo)
 
 router.post('/:index?',
@@ -20,13 +20,13 @@ Authorization.authorizeCreatedCourseWithLecture(),
 LectureController.createLecture)
 
 router.put('/:id',
-Validation.isParamsValidObjectIdCasting(),
+Validation.areParamsValidObjectIdCasting(),
 Authorization.authorize([Role.Instructor, Role.Moderator, Role.Admin]),
 Authorization.authorizeCreatedCourseWithLecture(),
 LectureController.editLecture)
 
 router.delete('/:id',
-Validation.isParamsValidObjectIdCasting(),
+Validation.areParamsValidObjectIdCasting(),
 Authorization.authorize([Role.Instructor, Role.Moderator, Role.Admin]),
 Authorization.authorizeCreatedCourseWithLecture(),
 LectureController.deleteLecture)

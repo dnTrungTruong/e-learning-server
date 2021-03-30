@@ -4,7 +4,8 @@ const path = require('path');
 const fs = require('fs');
 const cloudinary = require('cloudinary').v2;
 const config = require('../config.json')
-const s3 = require('../helpers/s3')
+const s3 = require('../helpers/s3');
+const { nextTick } = require("process");
 
 const resourcesDir = "/resources/";
 const __basedir = path.resolve();
@@ -18,6 +19,7 @@ exports.uploadImage = (req, res) => {
         if (req.file == undefined) {
           return res.status(200).json({ message: "Please upload a image!" });
         }
+        console.log(req.body);
         //reponse image url
         return res.status(200).json({ message: "success", data: req.file.location });
       })
@@ -71,12 +73,12 @@ exports.upload = (req, res) => {
 exports.uploadVideo = (req, res) => {
   var fileurls = [];
 
-  const fileName = "course_videos/" + req.params.section_id + "/" + Date.now() + "-" + req.query.fileName;
+  const fileName = "course_videos/" + req.params.course_id + "/" + Date.now() + "-" + req.query.fileName;
     const params = {
         Bucket: config.AWS_BUCKET_NAME,
         Key: fileName,
         Expires: 60 * 60, // Time untill presigned URL is valid
-        ACL: 'public-read',
+        //ACL: 'public-read',
         ContentType: req.query.fileType
     };
 
@@ -165,21 +167,31 @@ exports.getListFiles = (req, res) => {
   // });
 };
 
-exports.download = (req, res) => {
-  const params = {
+exports.download = (req, res, next) => {
+  let keyName = "course_videos" + "/" + req.params.course_id + "/" + req.params.filename;
+  let params = {
     Bucket: config.AWS_BUCKET_NAME,
-    Key: req.params.section_id + '/' +req.params.filename
+    Key: keyName,
+    Expires: 60 * 60,
+    ResponseContentDisposition :  `attachment; filename="${keyName}"` 
   }
+  s3.getSignedUrlPromise('getObject', params).then(function(url) {
+    return res.status(200).json({message: "sucess", data: url});
+  })
+
+
+ //Was used to download file from server
+  // res.setHeader('Content-Disposition', 'attachment');
  
-  res.setHeader('Content-Disposition', 'attachment');
- 
-  s3.getObject(params)
-    .createReadStream()
-      .on('error', function(err){
-        console.log("get");
-        console.log(req.params);
-        res.status(200).json({message: err.message});
-    }).pipe(res);
+  // s3.getObject(params)
+  //   .createReadStream()
+  //     .on('error', function(err){
+  //       console.log("get");
+  //       console.log(req.params);
+  //       res.status(200).json({message: err.message});
+  //   }).pipe(res);
+
+  //OLD - was used to download file from server local disk
   // const fileName = req.params.name;
   // const directoryPath = __basedir + resourcesDir + req.params.section_id + "/";
 
@@ -191,20 +203,20 @@ exports.download = (req, res) => {
   //   }
   // });
 };
+// OLD - Delete from server local disk
+// exports.delete = (req, res) => {
+//   const fileName = req.params.name;
+//   const directoryPath = __basedir + resourcesDir + req.params.section_id + "/";
 
-exports.delete = (req, res) => {
-  const fileName = req.params.name;
-  const directoryPath = __basedir + resourcesDir + req.params.section_id + "/";
-
-  fs.unlink(directoryPath + fileName, (err) => {
-    if (err) {
-      res.status(200).send({
-        message: "Could not delete the file. " + err,
-      });
-    }
-    else {
-      return res.status(200).json({message: "success"})
-    }
-  });
-  //Need to delete folder when folder is empty
-};
+//   fs.unlink(directoryPath + fileName, (err) => {
+//     if (err) {
+//       res.status(200).send({
+//         message: "Could not delete the file. " + err,
+//       });
+//     }
+//     else {
+//       return res.status(200).json({message: "success"})
+//     }
+//   });
+//   //Need to delete folder when folder is empty
+// };

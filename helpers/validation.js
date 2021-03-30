@@ -17,7 +17,7 @@ exports.validation = (schema, property) => {
     } 
   } 
 
-exports.isParamsValidObjectIdCasting = function()  {
+exports.areParamsValidObjectIdCasting = function()  {
   return [
     (req, res, next) => {
       if (!mongoose.isValidObjectId(req.params.id)) {

@@ -16,7 +16,7 @@ Authorization.authorize([Role.Moderator, Role.Admin]),
 CourseController.getCourseListByStatus)
 
 router.get('/:id',
-Validation.isParamsValidObjectIdCasting(),
+Validation.areParamsValidObjectIdCasting(),
 CourseController.getCourseDetails)
 
 router.post('/',
@@ -24,24 +24,24 @@ Authorization.authorize([Role.Instructor, Role.Moderator, Role.Admin]),
 CourseController.createCourse)
 
 router.put('/submit/:id',
-Validation.isParamsValidObjectIdCasting(),
+Validation.areParamsValidObjectIdCasting(),
 Authorization.authorize(),
 Authorization.authorizeCreatedCourse(),
 CourseController.submitCourseForApproval)
 
 router.put('/approve/:id',
-Validation.isParamsValidObjectIdCasting(),
+Validation.areParamsValidObjectIdCasting(),
 Authorization.authorize([Role.Moderator, Role.Admin]),
 CourseController.approveCourse)
 
 router.put('/:id',
-Validation.isParamsValidObjectIdCasting(),
+Validation.areParamsValidObjectIdCasting(),
 Authorization.authorize([Role.Instructor, Role.Moderator, Role.Admin]),
 Authorization.authorizeCreatedCourse(),
 CourseController.editCourse)
 
 router.delete('/:id', 
-Validation.isParamsValidObjectIdCasting(),
+Validation.areParamsValidObjectIdCasting(),
 Authorization.authorize([Role.Instructor, Role.Moderator, Role.Admin]),
 Authorization.authorizeCreatedCourse(),
 CourseController.deleteCourse)

@@ -8,7 +8,7 @@ const Validation = require('../helpers/validation');
 router.get('/', SubjectController.getSubjectList)
 
 router.get('/:id', 
-Validation.isParamsValidObjectIdCasting(),
+Validation.areParamsValidObjectIdCasting(),
 SubjectController.getSubjectInfo)
 
 router.post('/',
@@ -16,12 +16,12 @@ Authorization.authorize(Role.Admin),
 SubjectController.createSubject)
 
 router.put('/:id',
-Validation.isParamsValidObjectIdCasting(),
+Validation.areParamsValidObjectIdCasting(),
 Authorization.authorize(Role.Admin),
 SubjectController.editSubject)
 
 router.delete('/:id',
-Validation.isParamsValidObjectIdCasting(),
+Validation.areParamsValidObjectIdCasting(),
 Authorization.authorize(Role.Admin),
 SubjectController.deleteSubject)
 

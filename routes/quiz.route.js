@@ -8,11 +8,11 @@ const router = express.Router();
 
 
 router.get('/:id', 
-Validation.isParamsValidObjectIdCasting(),
+Validation.areParamsValidObjectIdCasting(),
 QuizController.getQuiz)
 
 router.post('/submit/:id', 
-Validation.isParamsValidObjectIdCasting(),
+Validation.areParamsValidObjectIdCasting(),
 QuizController.submitQuiz)
 
 router.post('/',
@@ -21,13 +21,13 @@ router.post('/',
 QuizController.createQuiz)
 
 router.put('/:id',
-Validation.isParamsValidObjectIdCasting(),
+Validation.areParamsValidObjectIdCasting(),
 // Authorization.authorize([Role.Instructor, Role.Moderator, Role.Admin]),
 // Authorization.authorizeCreatedCourseWithLecture(),
 QuizController.editQuiz)
 
 router.delete('/:id',
-Validation.isParamsValidObjectIdCasting(),
+Validation.areParamsValidObjectIdCasting(),
 // Authorization.authorize([Role.Instructor, Role.Moderator, Role.Admin]),
 // Authorization.authorizeCreatedCourseWithLecture(),
 QuizController.deleteQuiz)

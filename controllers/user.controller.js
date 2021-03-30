@@ -184,6 +184,35 @@ exports.editInfo = function (req, res, next) {
     })
 }
 
+exports.changePassword = async function (req, res, next) {
+    try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(200).json({message: "Provided user is not valid"});
+
+    //Need to change to use validation middleware here
+    if (!(req.body.password && req.body.newPassword && req.body.newPasswordConfirm)) return res.status(200).json({message: "Please provide all needed information"});
+
+    const valid = await bcrypt.compare(req.body.password, user.password);
+    if (!valid) return res.status(200).json({message: "Current password is incorrect"});
+    
+    
+
+    if (req.body.newPassword !== req.body.newPasswordConfirm) return res.status(200).json({message: "New password is not match"});
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedNewPassword = await bcrypt.hash(req.body.newPassword, salt);
+    user.password = hashedNewPassword;
+
+
+    const savedUser = await user.save();
+    res.status(200).json({message: "success"})
+
+    } 
+    catch(err) {
+        next(err)
+    }
+}
+
 exports.enrollCourse = function (req, res ,next) {
     //NEED TO CONFIRM BEFORE ADD TO COURSE
     User.findById(res.locals.user.sub, function (err, user) {

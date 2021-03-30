@@ -7,7 +7,7 @@ const router = express.Router();
 router.get('/listbycourse/:course_id', SectionController.getSectionList)
 
 router.get('/:id', 
-Validation.isParamsValidObjectIdCasting(),
+Validation.areParamsValidObjectIdCasting(),
 SectionController.getSectionInfo)
 
 router.post('/:index?', 
@@ -16,13 +16,13 @@ Authorization.authorizeCreatedCourseWithSection(),
 SectionController.createSection)
 
 router.put('/:id',
-Validation.isParamsValidObjectIdCasting(), 
+Validation.areParamsValidObjectIdCasting(), 
 Authorization.authorize(),
 Authorization.authorizeCreatedCourseWithSection(), 
 SectionController.editSection)
 
 router.delete('/:id',
-Validation.isParamsValidObjectIdCasting(), 
+Validation.areParamsValidObjectIdCasting(), 
 Authorization.authorize(),
 Authorization.authorizeCreatedCourseWithSection(), 
 SectionController.deleteSection)

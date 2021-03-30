@@ -16,7 +16,7 @@ UserController.create)
 router.post('/authenticate', UserController.authenticate)
 
 router.post('/enroll/:id', //provide courseId here
-Validation.isParamsValidObjectIdCasting(),
+Validation.areParamsValidObjectIdCasting(),
 Authorization.authorize(),
 UserController.enrollCourse)
 
@@ -48,7 +48,7 @@ UserController.authenticateWithPassport)
 
 
 router.get('/:id',
-Validation.isParamsValidObjectIdCasting(),
+Validation.areParamsValidObjectIdCasting(),
 Authorization.authorize(),
 Authorization.authorizeIdentity(),
 UserController.getUserInfo)
@@ -59,10 +59,18 @@ UserController.sendVerifyMail)
 
 router.get('/verification/verify/:userId/:secretCode', UserController.verifyMail)
 
+router.put('/change-password/:id', 
+Validation.areParamsValidObjectIdCasting(),
+Authorization.authorize(), 
+Authorization.authorizeIdentity(),
+UserController.changePassword)
+
 router.put('/:id', 
-Validation.isParamsValidObjectIdCasting(),
+Validation.areParamsValidObjectIdCasting(),
 Authorization.authorize(), 
 Authorization.authorizeIdentity(),
 UserController.editInfo)
+
+
 
 module.exports = router

@@ -36,6 +36,7 @@ let s3ImageStorage = multerS3({
   key: function (req, file, cb) {
     let newFileName = Date.now() + "-" + file.originalname;
     let fullPath = "public_assets/" + newFileName;
+    console.log(req.body);
     cb(null, fullPath  )
   }
 });
