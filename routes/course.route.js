@@ -9,7 +9,7 @@ router.get('/', CourseController.getCourseList)
 
 router.get('/hot', CourseController.getHotCourses)
 
-router.get('/search/:keyword?', CourseController.searchCourse)
+router.get('/search/', CourseController.searchCourse)
 
 router.get('/list/:status', 
 Authorization.authorize([Role.Moderator, Role.Admin]),

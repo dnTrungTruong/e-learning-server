@@ -38,7 +38,7 @@ const CourseSchema = new mongoose.Schema({
     ref: 'Section'
   }]
 });
-
+CourseSchema.index({name: 'text'});
 //use schema for 'course' collection schema
 const Course = mongoose.model('Course', CourseSchema);
 

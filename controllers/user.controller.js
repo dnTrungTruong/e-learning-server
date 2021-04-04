@@ -398,7 +398,7 @@ exports.getUserByRole = function (role) {
                     next(err);
                 }
                 else {
-                    if (result) {
+                    if (result.length) {
                         result.forEach(function removeUserPassword(user, index) {
                             const { password, __v, ...userWithoutPassword } = user._doc;
                             result[index]=userWithoutPassword 

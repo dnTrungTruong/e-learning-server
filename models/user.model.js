@@ -39,6 +39,7 @@ const UserSchema = new mongoose.Schema({
     default: false
   }
 });
+UserSchema.index({firstname: 'text', lastname: 'text'});
 
 //use schema for 'User' collection schema
 const User = mongoose.model('User', UserSchema);

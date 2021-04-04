@@ -71,13 +71,13 @@ exports.upload = (req, res) => {
 }
 
 exports.uploadVideo = (req, res) => {
-  var fileurls = [];
-
-  const fileName = "course_videos/" + req.params.course_id + "/" + Date.now() + "-" + req.query.fileName;
+  let fileurls = [];
+  let fileName = Date.now() + "-" + req.query.fileName;
+  let keyName = "course_videos/" + req.params.course_id + "/" + fileName;
     const params = {
         Bucket: config.AWS_BUCKET_NAME,
-        Key: fileName,
-        Expires: 60 * 60, // Time untill presigned URL is valid
+        Key: keyName,
+        Expires: 60 * 60, // Time until presigned URL is valid
         //ACL: 'public-read',
         ContentType: req.query.fileType
     };
@@ -91,6 +91,7 @@ exports.uploadVideo = (req, res) => {
         else {
             fileurls[0] = url;
             fileurls[1] = awsS3Url + encodeURI(fileName);
+            //return res.status(200).json({  message: 'success', data: { fileurl:fileurls, filename: fileName});
             return res.status(200).json({  message: 'success', data: fileurls });
         }
     });

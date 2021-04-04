@@ -1,6 +1,8 @@
 const Course = require('../models/course.model')
 const User = require('../models/user.model')
-const Subject = require('../models/subject.model')
+const Subject = require('../models/subject.model');
+const { search } = require('../routes/course.route');
+const { query } = require('express');
 
 exports.createCourse = function (req, res, next) {
     const course = new Course(req.body);
@@ -19,7 +21,7 @@ exports.createCourse = function (req, res, next) {
                 }
                 else {
                     if (!user) {
-                        return res.status(200).json({ message: "Provided user is not valid"});
+                        return res.status(200).json({ message: "Provided user is not valid" });
                     }
                     user.createdCourses.push(createdCourse._id);
 
@@ -44,7 +46,7 @@ exports.getCourseInfo = function (req, res, next) {
         }
         else {
             if (!course) {
-                return res.status(200).json({ message: "No result"});
+                return res.status(200).json({ message: "No result" });
             }
             res.status(200).json({ message: "success", data: course });
         }
@@ -62,7 +64,7 @@ exports.getCourseDetails = function (req, res, next) {
             }
             else {
                 if (!course) {
-                    return res.status(200).json({ message: "No result"});
+                    return res.status(200).json({ message: "No result" });
                 }
                 res.status(200).json({ message: "success", data: course });
             }
@@ -78,9 +80,9 @@ exports.getCourseList = function (req, res, next) {
                     next(err);
                 }
                 else {
-                    if (!result) {
-                        return res.status(200).json({ message: "No result"});
-                        
+                    if (!result.length) {
+                        return res.status(200).json({ message: "No result" });
+
                     }
                     res.status(200).json({ message: "success", data: result });
                 }
@@ -95,8 +97,8 @@ exports.getHotCourses = function (req, res, next) {
                 next(err);
             }
             else {
-                if (!result) {
-                    return res.status(200).json({ message: "No result"});
+                if (!result.length) {
+                    return res.status(200).json({ message: "No result" });
                 }
                 //Need to implement hot search not random
                 let sortedResult = result.sort(() => 0.5 - Math.random()).slice(0, 4);
@@ -111,8 +113,8 @@ exports.getCourseListByStatus = function (req, res, next) {
             next(err);
         }
         else {
-            if (!result) {
-                return res.status(200).json({ message: "No result"}); 
+            if (!result.length) {
+                return res.status(200).json({ message: "No result" });
             }
             res.status(200).json({ message: "success", data: result });
         }
@@ -158,69 +160,58 @@ exports.approveCourse = function (req, res, next) {
 }
 
 
-exports.searchCourse = function (req, res, next) {
-    if (req.params.keyword) {
-        Subject.findOne({ name: { "$regex": req.params.keyword, "$options": "i" } }, function (err, subjectResult) {
-            if (err) {
-                next(err);
-            }
-            else {
-                if (subjectResult) {
-                    Course.find()
-                        .and([
-                            { status: "Approved" },
-                            { $or: [{ name: { "$regex": req.params.keyword, "$options": "i" } }, { subject: subjectResult._id }] }
-                        ])
-                        .populate('instructor', 'firstname lastname')
-                        .exec(function (err, result) {
-                            if (err) {
-                                next(err);
-                            }
-                            else {
-                                if(!result) {
-                                    return res.status(200).json({ message: "No result"}); 
-                                }
-                                return res.status(200).json({ message: "success", data: result });
-                            }
-                        })
-                }
-                else {
-                    Course.find()
-                        .and([
-                            { status: "Approved" },
-                            { name: { "$regex": req.params.keyword, "$options": "i" } }
-                        ])
-                        .populate('instructor', 'firstname lastname')
-                        .exec(function (err, result) {
-                            if (err) {
-                                next(err);
-                            }
-                            else {
-                                if(!result) {
-                                    return res.status(200).json({ message: "No result"}); 
-                                }
-                                return res.status(200).json({ message: "success", data: result });
-                            }
-                        })
-                }
-            }
-        })
+exports.searchCourse = async function (req, res, next) {
+
+    try {
+        let searchQuery = [];
+        let sortBy = {};
+
+        //Search for the subject_id to filter
+        if (req.query.sub) { 
+            sub = await Subject.findOne({name: { "$regex": req.query.sub, "$options": "i" }}, {_id:1});
+            //Only filter with subject when we find a result
+            if (sub) { searchQuery.push({subject: sub}); }
+        }
+        //Search for users who have name matched keyword
+        //Method 1: {name: { "$regex": (req.query.keyword ? req.query.keyword : false), "$options": "i" }} - Find the names that contains keyword(string)
+        //Method 2: { $text: {$search: ((req.query.keyword ? req.query.keyword : false))}} - Split keyword(string) into words and find names that matched any word
+        //We're using method 2 to find instructor name and method 1 for course name
+        let users = await User.find({$text: {$search: ((req.query.keyword ? req.query.keyword : false))}}, {_id:1});
+        //Search with keyword or instructor name
+        searchQuery.push({$or: [{name: { "$regex": (req.query.keyword ? req.query.keyword : false), "$options": "i" }}, { instructor: {$in: users}} ]});
+        //Only search approved courses
+        searchQuery.push({status: "Approved"});
+
+        //Sorting with price
+        if (req.query.price) {
+            sortBy.price = (req.query.price==="descending" ? "descending" : "ascending");
+        }
+        //Sorting with reviews
+        //if (req.query.review) {
+        //  sortBy.review = (review==="descending" ? "descending" : "ascending");
+        //}
+        //------------------
+
+        //Pagination
+        const page = req.query.page ? parseInt(req.query.page) : 1;
+        const pagination = req.query.pagination ? parseInt(req.query.pagination) : 10;
+
+        let courses = await Course.find()
+        .and(searchQuery)
+        .sort(sortBy)
+        .skip((page - 1) * pagination)
+        .limit(pagination)
+        .populate('instructor', 'firstname lastname');
+
+        if (courses.length) {
+            return res.status(200).json({message: "sucess", data: courses});
+        }
+        else {
+            return res.status(200).json({message: "No result"});
+        }
     }
-    else {
-        Course.find({ status: "Approved" },)
-        .populate('instructor', 'firstname lastname')
-        .exec(
-            function (err, result) {
-                if (err) {
-                    next(err);
-                }
-                else {
-                    if(!result) {
-                        return res.status(200).json({ message: "No result"}); 
-                    }
-                    return res.status(200).json({ message: "success", data: result });
-                }
-            })
+    catch(err) {
+        next(err);
     }
 }
 
@@ -230,8 +221,8 @@ exports.editCourse = function (req, res, next) {
             next(err);
         }
         else {
-            if(!course) {
-                return res.status(200).json({ message: "Provided course is not valid"}); 
+            if (!course) {
+                return res.status(200).json({ message: "Provided course is not valid" });
             }
             course.name = req.body.name || course.name;
             course.subject = req.body.subject || course.subject;
@@ -258,8 +249,8 @@ exports.deleteCourse = function (req, res, next) {
             next(err);
         }
         else {
-            if(!course) {
-                return res.status(200).json({ message: "Provided course is not valid"}); 
+            if (!course) {
+                return res.status(200).json({ message: "Provided course is not valid" });
             }
             course.remove(function (err, deletedCourse) {
                 if (err) {

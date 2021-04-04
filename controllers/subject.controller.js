@@ -33,7 +33,7 @@ exports.getSubjectList = function (req, res ,next){
             next(err);
         }
         else {
-            if (!result) {
+            if (!result.length) {
                 return res.status(200).json({message: "No result" });
             }
             res.status(200).json({message: "success", data: result });
