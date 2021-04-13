@@ -20,6 +20,9 @@ const CourseSchema = new mongoose.Schema({
   description: {
       type: String
   },
+  objectives: [{
+    type: String
+  }],
   img: {
     type:String
   },

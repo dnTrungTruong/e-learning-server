@@ -57,7 +57,17 @@ exports.getCourseDetails = function (req, res, next) {
     Course.findById(req.params.id)
         .populate('subject', 'name')
         .populate('instructor', 'firstname lastname')
-        .populate('sections', 'name')
+        //.populate('sections', 'name')
+        .populate({
+            path: 'sections',
+            model: 'Section',
+            select: {'_id': 1, 'name': 1, 'lectures': 1},
+            populate: {
+                path: 'lectures',
+                model: 'Lecture',
+                select: {'_id': 1, 'name': 1}
+            }
+        })
         .exec(function (err, course) {
             if (err) {
                 next(err);
@@ -170,15 +180,18 @@ exports.searchCourse = async function (req, res, next) {
         if (req.query.sub) { 
             sub = await Subject.findOne({name: { "$regex": req.query.sub, "$options": "i" }}, {_id:1});
             //Only filter with subject when we find a result
-            if (sub) { searchQuery.push({subject: sub}); }
+            if (sub) { searchQuery.push({subject: sub._id});}
         }
         //Search for users who have name matched keyword
+        //(OLD)
         //Method 1: {name: { "$regex": (req.query.keyword ? req.query.keyword : false), "$options": "i" }} - Find the names that contains keyword(string)
         //Method 2: { $text: {$search: ((req.query.keyword ? req.query.keyword : false))}} - Split keyword(string) into words and find names that matched any word
         //We're using method 2 to find instructor name and method 1 for course name
-        let users = await User.find({$text: {$search: ((req.query.keyword ? req.query.keyword : false))}}, {_id:1});
-        //Search with keyword or instructor name
-        searchQuery.push({$or: [{name: { "$regex": (req.query.keyword ? req.query.keyword : false), "$options": "i" }}, { instructor: {$in: users}} ]});
+        if (req.query.keyword) {
+            let users = await User.find({$text: {$search: req.query.keyword}}, {_id:1});
+            //Search with keyword or instructor name
+            searchQuery.push({$or: [{name: { "$regex": req.query.keyword, "$options": "i" }}, { instructor: {$in: users}} ]});
+        }
         //Only search approved courses
         searchQuery.push({status: "Approved"});
 
@@ -199,12 +212,17 @@ exports.searchCourse = async function (req, res, next) {
         let courses = await Course.find()
         .and(searchQuery)
         .sort(sortBy)
-        .skip((page - 1) * pagination)
-        .limit(pagination)
+        .skip((page - 1) * 1)
+        .limit(1)
         .populate('instructor', 'firstname lastname');
 
-        if (courses.length) {
+
+        //Find how many results the query really had (not working)
+        //let count = await courses.count();
+
+        if (courses) {
             return res.status(200).json({message: "sucess", data: courses});
+            //return res.status(200).json({message: "sucess", data: {courses: courses, count: count}});
         }
         else {
             return res.status(200).json({message: "No result"});
@@ -227,10 +245,10 @@ exports.editCourse = function (req, res, next) {
             course.name = req.body.name || course.name;
             course.subject = req.body.subject || course.subject;
             course.description = req.body.description || course.description;
+            course.objectives = req.body.objectives || course.objectives;
             course.price = req.body.price || course.price;
-            course.img = req.body.img || course.img;
             course.img_url = req.body.img_url || course.img_url;
-
+            
             course.save(function (err, updatedCourse) {
                 if (err) {
                     next(err);
