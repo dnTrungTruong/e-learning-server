@@ -15,7 +15,7 @@ UserController.create)
 
 router.post('/authenticate', UserController.authenticate)
 
-router.post('/enroll/:id', //provide courseId here
+router.put('/enroll/:id', //provide courseId here
 Validation.areParamsValidObjectIdCasting(),
 Authorization.authorize(),
 UserController.enrollCourse)
@@ -46,12 +46,17 @@ router.get('/auth/facebook/callback',
 passport.authenticate('facebook', { failureRedirect: '/api/user/auth/facebook/failed', session: false }), 
 UserController.authenticateWithPassport)
 
+router.get('/userinfo-with-jwt',
+Authorization.authorize(),
+UserController.getUserInfoJWT)
 
 router.get('/:id',
 Validation.areParamsValidObjectIdCasting(),
 Authorization.authorize(),
 Authorization.authorizeIdentity(),
 UserController.getUserInfo)
+
+
 
 router.get('/verification/send/',
 Authorization.authorize(),

@@ -14,8 +14,8 @@ exports.authorize=function authorize(roles = []) {
         roles = [roles];
     }
     
-
     return [
+        
         // authenticate JWT token and attach user to request object (req.user)
         jwt({ secret, algorithms: ['HS256'] }),
 
@@ -64,6 +64,29 @@ exports.authorizeCreatedCourse = function () {
                         return res.status(401).json({ message: 'Provided user is not valid'});
                     }
                     if (user.createdCourses.includes(req.params.id)) {
+                        next()
+                    }
+                    else {
+                        return res.status(401).json({ message: 'Unauthorized' });
+                    }             
+                }
+            });
+        }
+    ];
+}
+
+exports.authorizeEnrolledCourse = function () {
+    return [
+        (req, res , next) => {
+            User.findById(req.user.sub, function (err, user) {
+                if (err) {
+                    next(err);
+                }
+                else {
+                    if (!user) {
+                        return res.status(401).json({ message: 'Provided user is not valid'});
+                    }
+                    if (user.enrolledCourses.includes(req.params.id)) {
                         next()
                     }
                     else {

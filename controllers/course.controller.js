@@ -81,6 +81,35 @@ exports.getCourseDetails = function (req, res, next) {
         });
 }
 
+exports.getCourseLearningDetails = function (req, res, next) {
+    Course.findById(req.params.id)
+        .populate('instructor', 'firstname lastname')
+        //.populate('sections', 'name')
+        .populate({
+            path: 'sections',
+            model: 'Section',
+            populate: [{
+                path: 'lectures',
+                model: 'Lecture'
+            },
+            {
+                path: 'quiz',
+                model: 'Quiz'
+            }]
+        })
+        .exec(function (err, course) {
+            if (err) {
+                next(err);
+            }
+            else {
+                if (!course) {
+                    return res.status(200).json({ message: "No result" });
+                }
+                res.status(200).json({ message: "success", data: course });
+            }
+        });
+}
+
 exports.getCourseList = function (req, res, next) {
     Course.find({ status: "Approved" },)
         .populate('instructor', 'firstname lastname')

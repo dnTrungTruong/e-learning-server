@@ -19,6 +19,12 @@ router.get('/:id',
 Validation.areParamsValidObjectIdCasting(),
 CourseController.getCourseDetails)
 
+router.get('/learning/:id',
+Validation.areParamsValidObjectIdCasting(),
+// Authorization.authorize(),
+// Authorization.authorizeEnrolledCourse(),
+CourseController.getCourseLearningDetails)
+
 router.post('/',
 Authorization.authorize([Role.Instructor, Role.Moderator, Role.Admin]),
 CourseController.createCourse)

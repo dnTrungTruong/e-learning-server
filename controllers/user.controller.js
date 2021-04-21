@@ -154,7 +154,22 @@ exports.getUserInfo = function (req, res, next) {
     });
 }
 
-
+exports.getUserInfoJWT = function (req, res, next) {
+    User.findById(res.locals.user.sub, function (err, user) {
+        if (err) {
+            next(err);
+        }
+        else {
+            if (user) {
+                const { password, __v, ...userWithoutPassword } = user._doc;
+                res.status(200).json({message: "success", data: userWithoutPassword });
+            }
+            else {
+                res.status(200).json({ message: "No result" });
+            }
+        }
+    });
+}
 
 exports.editInfo = function (req, res, next) {
     User.findById(req.params.id, function (err, user) {
@@ -221,7 +236,7 @@ exports.enrollCourse = function (req, res ,next) {
         }
         else {
             if (user) {
-                user.enrolledCourses.push(req.params.course_id);
+                user.enrolledCourses.push(req.params.id);
             
                 user.save(function (err, updatedUser) {
                     if (err) {
