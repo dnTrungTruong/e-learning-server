@@ -111,7 +111,7 @@ exports.getCourseLearningDetails = function (req, res, next) {
 }
 
 exports.getCourseList = function (req, res, next) {
-    Course.find({ status: "Approved" },)
+    Course.find({ status: "Approved" })
         .populate('instructor', 'firstname lastname')
         .exec(
             function (err, result) {
@@ -249,7 +249,7 @@ exports.searchCourse = async function (req, res, next) {
         //Find how many results the query really had (not working)
         //let count = await courses.count();
 
-        if (courses) {
+        if (courses.length) {
             return res.status(200).json({message: "sucess", data: courses});
             //return res.status(200).json({message: "sucess", data: {courses: courses, count: count}});
         }

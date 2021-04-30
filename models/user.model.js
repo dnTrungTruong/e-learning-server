@@ -29,10 +29,12 @@ const UserSchema = new mongoose.Schema({
     required: true
   },
   enrolledCourses: [{
-    type: mongoose.Schema.Types.ObjectId
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Course'
   }],
   createdCourses: [{
-    type: mongoose.Schema.Types.ObjectId
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Course'
   }],
   isVerified: {
     type: Boolean,

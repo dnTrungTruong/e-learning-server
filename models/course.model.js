@@ -39,7 +39,18 @@ const CourseSchema = new mongoose.Schema({
   sections: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Section'
-  }]
+  }],
+  type: {
+    type: String,
+    required: true
+  },
+  avgRate: {
+    type: Number
+  },
+  reviewsNumber: {
+    type: Number,
+    default: 0
+  }
 });
 CourseSchema.index({name: 'text'});
 //use schema for 'course' collection schema

@@ -3,6 +3,7 @@ const { secret } = require('config.json');
 const User = require('../models/user.model');
 const Section = require('../models/section.model');
 const Lecture = require('../models/lecture.model');
+const Review = require('../models/review.model');
 const Role = require('../helpers/role');
 
 
@@ -218,6 +219,57 @@ exports.authorizeCourseWithFile = function () {
                             next()
                         }
                     })
+                }
+            });
+        }
+    ];
+}
+
+exports.authorizeCourseWithReview = function () {
+    return [
+        (req, res , next) => {
+            User.findById(req.user.sub, function (err, user) {
+                if (err) {
+                    next(err);
+                }
+                else {
+                    if (!user) {
+                        return res.status(200).json({ message: 'Provided user is not valid'});
+                    }
+                    // if method is POST then the course_id is in req.body.course
+                    if (req.method == "POST") {
+                        if (req.body.course) {
+                            if (!user.enrolledCourses.includes(req.body.course)) {
+                                return res.status(401).json({ message: 'Unauthorized' });
+                            }
+                        }
+                        next();
+                    }
+                    //else we need to find the review with the review_id in the params to get the course_id
+                    else {
+                        Review.findById(req.params.id, function (err, review) {
+                            if (err) {
+                                next(error);
+                            }
+                            else {
+                                if (!review) {
+                                    return res.status(200).json({ message: 'Provided review is not valid'});
+                                }
+                                if (req.method == "PUT") {
+                                    if (!user.createdCourses.includes(review.course)) {
+                                        return res.status(401).json({ message: 'Unauthorized' });
+                                    }
+                                    next(); 
+                                }
+                                else {
+                                    if (!user.enrolledCourses.includes(review.course)) {
+                                        return res.status(401).json({ message: 'Unauthorized' });
+                                    }
+                                    next(); 
+                                }
+                            }
+                        })
+                    }
                 }
             });
         }

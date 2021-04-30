@@ -53,9 +53,12 @@ exports.getQuiz = function (req, res, next) {
                     return res.status(200).json({ message: "No result"}); 
                 }
                 //shuffle the questions before sending back to client
-                const shuffledQuestions = quiz.questions.sort(() => Math.random() - 0.5);
+                const shuffledQuestions = quiz.questions.sort(() => Math.random() - 0.5); 
                 quiz.questions = shuffledQuestions;
-
+                for(let question of quiz.questions) {
+                    const shuffledQuestion = question.answers.sort(() => Math.random() - 0.5); 
+                    question = shuffledQuestion;
+                }
                 res.status(200).json({ message: "success", data: quiz });
             }
         });
@@ -76,11 +79,14 @@ exports.submitQuiz = function (req, res, next) {
                 totalQuestions = quiz.questions.length;
                 correctAnswer = 0;
                 quiz.questions.forEach(function (quizQuestion) {
+                    if (!req.body.questions) {
+                        return res.status(200).json({message: "Please provide answer for the quiz."})
+                    }
                     const i = req.body.questions.findIndex(function (submittedQuestion) {
                         return submittedQuestion.question == quizQuestion.question;
                     });
                     if (i != -1) {
-                        if (req.body.questions[i].answer == quizQuestion.correctAnswer) {
+                        if (req.body.questions[i].userAnswer == quizQuestion.correctAnswer) {
                             correctAnswer += 1;
                         }
                     }

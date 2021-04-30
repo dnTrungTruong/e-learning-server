@@ -28,7 +28,7 @@ const QuizSchema = new mongoose.Schema({
     }]
 });
 
-//use schema for 'lecture' collection schema
+//use schema for 'quiz' collection schema
 const Quiz = mongoose.model('Quiz', QuizSchema);
 
 

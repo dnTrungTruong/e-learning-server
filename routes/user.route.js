@@ -50,6 +50,10 @@ router.get('/userinfo-with-jwt',
 Authorization.authorize(),
 UserController.getUserInfoJWT)
 
+router.get('/my-enrolled-courses',
+Authorization.authorize(),
+UserController.getMyEnrolledCourses)
+
 router.get('/:id',
 Validation.areParamsValidObjectIdCasting(),
 Authorization.authorize(),

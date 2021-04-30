@@ -8,6 +8,7 @@ const emailService = require('../helpers/emailService')
 const config = require('config.json');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs')
+const Course = require('../models/course.model')
 
 
 
@@ -15,7 +16,7 @@ const bcrypt = require('bcryptjs')
 //create new user function
 //birthday incorrect - need momentjs
 exports.create = async function (req, res, next) {
-    try{
+    try {
         const user = new User(req.body);
         user.role = Role.Student;
         //Hash password
@@ -25,11 +26,11 @@ exports.create = async function (req, res, next) {
 
 
         const createdUser = await user.save();
-        res.status(200).json({message: "success", data: createdUser})
-    }catch (err) {
+        res.status(200).json({ message: "success", data: createdUser })
+    } catch (err) {
         next(err);
     }
-    
+
 
     //Hash password
     // bcrypt.genSalt(10, function (err, salt) {
@@ -56,7 +57,7 @@ exports.create = async function (req, res, next) {
     //     }
     // })
 
-    
+
 }
 
 //authenticate user
@@ -64,11 +65,11 @@ exports.authenticate = async function (req, res, next) {
 
     try {
         const user = await User.findOne({ email: req.body.email });
-        if (!user) return res.status(200).json({message: "Email or password is incorrect"});
+        if (!user) return res.status(200).json({ message: "Email or password is incorrect" });
 
         const valid = await bcrypt.compare(req.body.password, user.password);
-        if (!valid) return res.status(200).json({message: "Email or password is incorrect"});
-        
+        if (!valid) return res.status(200).json({ message: "Email or password is incorrect" });
+
         const userData = user._doc;
         const token = jwt.sign({ sub: userData._id, role: userData.role }, config.secret);
         const { password, __v, ...userWithoutPassword } = userData;
@@ -76,7 +77,7 @@ exports.authenticate = async function (req, res, next) {
             'userdata': userWithoutPassword,
             'token': token
         };
-        res.status(200).json({message: "success", data: authData});
+        res.status(200).json({ message: "success", data: authData });
     }
     catch (err) {
         next(err)
@@ -129,7 +130,7 @@ exports.authenticateWithPassport = async function (req, res, next) {
             'userdata': userWithoutPassword,
             'token': token
         };
-        res.status(200).json({message: "success", data: authData});
+        res.status(200).json({ message: "success", data: authData });
     }
     catch (err) {
         next(err)
@@ -145,7 +146,7 @@ exports.getUserInfo = function (req, res, next) {
         else {
             if (user) {
                 const { password, __v, ...userWithoutPassword } = user._doc;
-                res.status(200).json({message: "success", data: userWithoutPassword });
+                res.status(200).json({ message: "success", data: userWithoutPassword });
             }
             else {
                 res.status(200).json({ message: "No result" });
@@ -162,7 +163,33 @@ exports.getUserInfoJWT = function (req, res, next) {
         else {
             if (user) {
                 const { password, __v, ...userWithoutPassword } = user._doc;
-                res.status(200).json({message: "success", data: userWithoutPassword });
+                res.status(200).json({ message: "success", data: userWithoutPassword });
+            }
+            else {
+                res.status(200).json({ message: "No result" });
+            }
+        }
+    });
+}
+
+exports.getMyEnrolledCourses = function (req, res, next) {
+    User.findById(res.locals.user.sub, function (err, user) {
+        if (err) {
+            next(err);
+        }
+        else {
+            if (user) {
+                Course.find({ '_id': { $in: user.enrolledCourses } })
+                    .populate('subject', 'name')
+                    .populate('instructor', 'firstname lastname')
+                    .exec(function (err, courses) {
+                        if (courses) {
+                            res.status(200).json({ message: "success", data: courses });
+                        }
+                        else {
+                            res.status(200).json({ message: "No result" });
+                        }
+                    })
             }
             else {
                 res.status(200).json({ message: "No result" });
@@ -187,48 +214,48 @@ exports.editInfo = function (req, res, next) {
                         next(err);
                     }
                     else {
-                        res.status(200).json({message: "success", data: updatedUser})
+                        res.status(200).json({ message: "success", data: updatedUser })
                     }
                 })
             }
             else {
                 res.status(200).json({ message: "Provided user is not valid" });
             }
-            
+
         }
     })
 }
 
 exports.changePassword = async function (req, res, next) {
     try {
-    const user = await User.findById(req.params.id);
-    if (!user) return res.status(200).json({message: "Provided user is not valid"});
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(200).json({ message: "Provided user is not valid" });
 
-    //Need to change to use validation middleware here
-    if (!(req.body.password && req.body.newPassword && req.body.newPasswordConfirm)) return res.status(200).json({message: "Please provide all needed information"});
+        //Need to change to use validation middleware here
+        if (!(req.body.password && req.body.newPassword && req.body.newPasswordConfirm)) return res.status(200).json({ message: "Please provide all needed information" });
 
-    const valid = await bcrypt.compare(req.body.password, user.password);
-    if (!valid) return res.status(200).json({message: "Current password is incorrect"});
-    
-    
-
-    if (req.body.newPassword !== req.body.newPasswordConfirm) return res.status(200).json({message: "New password is not match"});
-
-    const salt = await bcrypt.genSalt(10);
-    const hashedNewPassword = await bcrypt.hash(req.body.newPassword, salt);
-    user.password = hashedNewPassword;
+        const valid = await bcrypt.compare(req.body.password, user.password);
+        if (!valid) return res.status(200).json({ message: "Current password is incorrect" });
 
 
-    const savedUser = await user.save();
-    res.status(200).json({message: "success"})
 
-    } 
-    catch(err) {
+        if (req.body.newPassword !== req.body.newPasswordConfirm) return res.status(200).json({ message: "New password is not match" });
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedNewPassword = await bcrypt.hash(req.body.newPassword, salt);
+        user.password = hashedNewPassword;
+
+
+        const savedUser = await user.save();
+        res.status(200).json({ message: "success" })
+
+    }
+    catch (err) {
         next(err)
     }
 }
 
-exports.enrollCourse = function (req, res ,next) {
+exports.enrollCourse = function (req, res, next) {
     //NEED TO CONFIRM BEFORE ADD TO COURSE
     User.findById(res.locals.user.sub, function (err, user) {
         if (err) {
@@ -237,25 +264,25 @@ exports.enrollCourse = function (req, res ,next) {
         else {
             if (user) {
                 user.enrolledCourses.push(req.params.id);
-            
+
                 user.save(function (err, updatedUser) {
                     if (err) {
                         next(err);
                     }
                     else {
-                        res.status(200).json({message: "success", data: updatedUser})
+                        res.status(200).json({ message: "success", data: updatedUser })
                     }
                 })
             }
             else {
                 res.status(200).json({ message: "Provided user is not valid" });
             }
-            
+
         }
     })
 }
 
-exports.sendVerifyMail = async function (req, res ,next) {
+exports.sendVerifyMail = async function (req, res, next) {
     const baseUrl = req.protocol + "://" + req.get("host");
     try {
         const user = await User.findById(res.locals.user.sub);
@@ -264,7 +291,7 @@ exports.sendVerifyMail = async function (req, res ,next) {
             res.json({ message: "This email is not associated with any account" });
         } else {
             if (user.isVerified) {
-                return res.status(200).json({message: "Email have already been verified"})
+                return res.status(200).json({ message: "Email have already been verified" })
             }
             await SecretCode.deleteMany({ email: user.email });
 
@@ -302,10 +329,10 @@ exports.verifyMail = async function (req, res, next) {
         });
 
         if (!user) {
-            res.status(200).json({message: "Provided information for verification is incorrect. Please check your link."})
+            res.status(200).json({ message: "Provided information for verification is incorrect. Please check your link." })
         } else {
             if (!response) {
-                return res.status(200).json({message: "Provided information for verification is incorrect. Please check your link."})
+                return res.status(200).json({ message: "Provided information for verification is incorrect. Please check your link." })
             }
             await User.updateOne(
                 { email: user.email },
@@ -324,21 +351,21 @@ exports.verifyMail = async function (req, res, next) {
             // }
 
             // res.redirect(redirectPath);
-            res.status(200).json({message: "success"});
+            res.status(200).json({ message: "success" });
         }
     } catch (err) {
         next(err);
     }
 }
 
-exports.sendSecretCode = async function (req,res, next) {
-    if (!req.body.email) { 
+exports.sendSecretCode = async function (req, res, next) {
+    if (!req.body.email) {
         res.status(200).json({ message: "Please provide your email address!" });
     } else {
         try {
             const user = await User.findOne({ email: req.body.email });
 
-            if (!user || !user.isVerified) { 
+            if (!user || !user.isVerified) {
                 res.status(200).json({ message: "The provided email address is not registered!" });
             } else {
                 const secretCode = cryptoRandomString({
@@ -359,7 +386,7 @@ exports.sendSecretCode = async function (req,res, next) {
                 };
                 await emailService.sendMail(data);
 
-                res.status(200).json({message: "success"});
+                res.status(200).json({ message: "success" });
             }
         } catch (err) {
             next(err);
@@ -371,12 +398,12 @@ exports.verifySecretCode = async function (req, res, next) {
     const { email, password, password2, code } = req.body;
 
     if (!email || !password || !password2 || !code) {
-        return res.status(200).json({message: "Please fill in all fields"});
+        return res.status(200).json({ message: "Please fill in all fields" });
     }
     if (password != password2) {
-        return res.status(200).json({message: "Passwords do not match"});
+        return res.status(200).json({ message: "Passwords do not match" });
     }
-    
+
     // if (
     //     !password.match(
     //         /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{6,}$/
@@ -392,13 +419,13 @@ exports.verifySecretCode = async function (req, res, next) {
 
 
         if (!response) {
-            return res.status(200).json({message: "The entered code is not correct. Please make sure to enter the code in the requested time interval."});
+            return res.status(200).json({ message: "The entered code is not correct. Please make sure to enter the code in the requested time interval." });
         } else {
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await bcrypt.hash(req.body.password, salt);
             await User.updateOne({ email }, { password: hashedPassword });
             await SecretCode.deleteOne({ email, code });
-            res.status(200).json({message: "success"});
+            res.status(200).json({ message: "success" });
         }
     } catch (err) {
         next(err);
@@ -416,9 +443,9 @@ exports.getUserByRole = function (role) {
                     if (result.length) {
                         result.forEach(function removeUserPassword(user, index) {
                             const { password, __v, ...userWithoutPassword } = user._doc;
-                            result[index]=userWithoutPassword 
+                            result[index] = userWithoutPassword
                         })
-                        res.status(200).json({message: "success", data: result });
+                        res.status(200).json({ message: "success", data: result });
                     }
                     else {
                         res.status(200).json({ message: "No result" });
@@ -427,5 +454,5 @@ exports.getUserByRole = function (role) {
             })
         }
     ]
-    
+
 }
