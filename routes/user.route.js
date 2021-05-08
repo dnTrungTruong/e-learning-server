@@ -4,7 +4,7 @@ const Authorization = require('../helpers/authorization')
 const UserController = require('../controllers/user.controller')
 const Validation = require('../helpers/validation');
 const Schema = require('../helpers/validationSchemas')
-const Role = require('../helpers/role');
+const Constants = require('../helpers/constants');
 
 const router = express.Router();
 
@@ -24,9 +24,9 @@ router.post('/password-reset/send', UserController.sendSecretCode)
 
 router.post('/password-reset/verify', UserController.verifySecretCode)
 
-router.get('/list/student', Authorization.authorize(Role.Admin), UserController.getUserByRole(Role.Student))
-router.get('/list/instructor/', Authorization.authorize(Role.Admin), UserController.getUserByRole(Role.Instructor))
-router.get('/list/moderator', Authorization.authorize(Role.Admin), UserController.getUserByRole(Role.Moderator))
+router.get('/list/student', Authorization.authorize(Constants.USER_ROLES.ADMIN), UserController.getUserByRole(Constants.USER_ROLES.STUDENT))
+router.get('/list/instructor/', Authorization.authorize(Constants.USER_ROLES.ADMIN), UserController.getUserByRole(Constants.USER_ROLES.INSTRUCTOR))
+router.get('/list/moderator', Authorization.authorize(Constants.USER_ROLES.ADMIN), UserController.getUserByRole(Constants.USER_ROLES.MODERATOR))
 
 router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 

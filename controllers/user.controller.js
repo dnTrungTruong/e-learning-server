@@ -1,15 +1,14 @@
-const Role = require('../helpers/role')
-const User = require('../models/user.model')
-const validate = require('../helpers/validationSchemas')
-const SecretCode = require('../models/secretcode.model')
-const cryptoRandomString = require('crypto-random-string')
-const emailService = require('../helpers/emailService')
-
+const User = require('../models/user.model');
+const validate = require('../helpers/validationSchemas');
+const SecretCode = require('../models/secretcode.model');
+const cryptoRandomString = require('crypto-random-string');
+const emailService = require('../helpers/emailService');
 const config = require('config.json');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs')
-const Course = require('../models/course.model')
-const { gmail } = require('googleapis/build/src/apis/gmail')
+const bcrypt = require('bcryptjs');
+const Course = require('../models/course.model');
+const Constants = require('../helpers/constants');
+const { gmail } = require('googleapis/build/src/apis/gmail');
 
 
 
@@ -19,7 +18,7 @@ const { gmail } = require('googleapis/build/src/apis/gmail')
 exports.create = async function (req, res, next) {
     try {
         const user = new User(req.body);
-        user.role = Role.Student;
+        user.role = Constants.USER_ROLES.STUDENT;
         //Hash password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(req.body.password, salt);

@@ -95,6 +95,10 @@ exports.getCourseLearningDetails = function (req, res, next) {
             {
                 path: 'quiz',
                 model: 'Quiz'
+            },
+            {
+                path: 'announcements',
+                model: 'Announcement'
             }]
         })
         .exec(function (err, course) {

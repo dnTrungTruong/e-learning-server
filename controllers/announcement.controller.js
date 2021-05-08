@@ -1,5 +1,8 @@
 const Announcement = require('../models/announcement.model')
 const Comment = require('../models/comment.model')
+const Course = require('../models/course.model')
+const Section = require('../models/section.model')
+const Constants = require('../helpers/constants')
 
 // exports.getCommentsWithAnnouncementId = function (req, res, next) {
 //     Comment.find({announcement: req.params.id})
@@ -58,6 +61,17 @@ exports.createAnnouncement = async function(req, res, next){
             user: res.locals.user.sub,
             content: req.body.content
         });
+        const course = await Course.findById(req.body.course);
+        if (course.type === Constants.COURSE_TYPES.ONLINE) {
+            if (!req.body.section) {
+                return res.status(200).json({message: "Section is required"});
+            }
+            const updatedSection = await Section.updateOne({ _id: req.body.section }, {
+                "$push": {
+                    "announcements": announcement._id
+                }
+            });
+        }
         //Save the announcement
         const savedAnnouncement = await announcement.save();
 

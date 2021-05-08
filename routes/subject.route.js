@@ -1,7 +1,7 @@
 const express = require('express');
 const SubjectController = require('../controllers/subject.controller');
 const Authorization = require('../helpers/authorization')
-const Role = require('../helpers/role')
+const Constants = require('../helpers/constants')
 const router = express.Router();
 const Validation = require('../helpers/validation');
 
@@ -12,17 +12,17 @@ Validation.areParamsValidObjectIdCasting(),
 SubjectController.getSubjectInfo)
 
 router.post('/',
-Authorization.authorize(Role.Admin),
+Authorization.authorize(Constants.USER_ROLES.ADMIN),
 SubjectController.createSubject)
 
 router.put('/:id',
 Validation.areParamsValidObjectIdCasting(),
-Authorization.authorize(Role.Admin),
+Authorization.authorize(Constants.USER_ROLES.ADMIN),
 SubjectController.editSubject)
 
 router.delete('/:id',
 Validation.areParamsValidObjectIdCasting(),
-Authorization.authorize(Role.Admin),
+Authorization.authorize(Constants.USER_ROLES.ADMIN),
 SubjectController.deleteSubject)
 
 module.exports = router

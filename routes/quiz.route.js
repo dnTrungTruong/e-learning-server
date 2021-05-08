@@ -2,7 +2,7 @@ const express = require('express');
 const QuizController = require('../controllers/quiz.controller');
 const Authorization = require('../helpers/authorization');
 const Validation = require('../helpers/validation');
-const Role = require('../helpers/role')
+const Constants = require('../helpers/constants')
 
 const router = express.Router();
 
@@ -16,19 +16,19 @@ Validation.areParamsValidObjectIdCasting(),
 QuizController.submitQuiz)
 
 router.post('/',
-// Authorization.authorize([Role.Instructor, Role.Moderator, Role.Admin]),
+// Authorization.authorize([Constants.USER_ROLES.INSTRUCTOR, Constants.USER_ROLES.MODERATOR, Constants.USER_ROLES.ADMIN]),
 // Authorization.authorizeCreatedCourseWithLecture(),
 QuizController.createQuiz)
 
 router.put('/:id',
 Validation.areParamsValidObjectIdCasting(),
-// Authorization.authorize([Role.Instructor, Role.Moderator, Role.Admin]),
+// Authorization.authorize([Constants.USER_ROLES.INSTRUCTOR, Constants.USER_ROLES.MODERATOR, Constants.USER_ROLES.ADMIN]),
 // Authorization.authorizeCreatedCourseWithLecture(),
 QuizController.editQuiz)
 
 router.delete('/:id',
 Validation.areParamsValidObjectIdCasting(),
-// Authorization.authorize([Role.Instructor, Role.Moderator, Role.Admin]),
+// Authorization.authorize([Constants.USER_ROLES.INSTRUCTOR, Constants.USER_ROLES.MODERATOR, Constants.USER_ROLES.ADMIN]),
 // Authorization.authorizeCreatedCourseWithLecture(),
 QuizController.deleteQuiz)
 
