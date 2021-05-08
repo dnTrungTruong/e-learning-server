@@ -8,6 +8,7 @@ const lectureRoute = require('./lecture.route')
 const quizRoute = require('./quiz.route')
 const fileRoute = require('./file.route')
 const reviewRoute = require('./review.route')
+const announcementRoute = require('./announcement.route')
 
 //index of routes
 router.get('/', function (req, res) {
@@ -22,6 +23,7 @@ router.use('/lecture', lectureRoute)
 router.use('/quiz', quizRoute)
 router.use('/file', fileRoute)
 router.use('/review', reviewRoute)
+router.use('/announcement', announcementRoute)
 
 //export router
 module.exports = router;

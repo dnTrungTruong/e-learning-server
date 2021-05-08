@@ -54,6 +54,9 @@ router.get('/my-enrolled-courses',
 Authorization.authorize(),
 UserController.getMyEnrolledCourses)
 
+router.get('/test-mail-api',
+UserController.sendTestMail)
+
 router.get('/:id',
 Validation.areParamsValidObjectIdCasting(),
 Authorization.authorize(),

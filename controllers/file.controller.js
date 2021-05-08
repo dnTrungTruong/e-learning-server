@@ -19,7 +19,6 @@ exports.uploadImage = (req, res) => {
         if (req.file == undefined) {
           return res.status(200).json({ message: "Please upload a image!" });
         }
-        console.log(req.body);
         //reponse image url
         return res.status(200).json({ message: "success", data: req.file.location });
       })
@@ -54,7 +53,8 @@ exports.upload = (req, res) => {
       return res.status(200).send({ message: "Please upload a file!" });
     }
     return res.status(200).json({
-      message: "success"
+      message: "success",
+      data: req.file.location
     });
   })
   .catch((err) => {

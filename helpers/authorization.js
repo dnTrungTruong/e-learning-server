@@ -24,6 +24,7 @@ exports.authorize=function authorize(roles = []) {
         (req, res, next) => {
             if (roles.length && !roles.includes(req.user.role)) {
                 // user's role is not authorized
+                console.log(req.user);
                 return res.status(401).json({ message: 'Unauthorized' });
             }
             // authentication and authorization successful

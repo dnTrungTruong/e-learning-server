@@ -9,6 +9,7 @@ const config = require('config.json');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs')
 const Course = require('../models/course.model')
+const { gmail } = require('googleapis/build/src/apis/gmail')
 
 
 
@@ -280,6 +281,23 @@ exports.enrollCourse = function (req, res, next) {
 
         }
     })
+}
+exports.sendTestMail = async function(req, res, next) {
+    try {
+        const data = {
+            from: config.EMAIL_USERNAME,
+            to: "nguyenhoanghuunghia@gmail.com",
+            subject: "Your Activation Link for YOUR APP",
+            text: `Testing mail apis`,
+            html: `Testing mail apis`,
+        };
+        await emailService.sendMail(data);
+
+        res.status(200).json({ message: "success" });
+    }
+    catch(err) {
+        next(err);
+    }
 }
 
 exports.sendVerifyMail = async function (req, res, next) {
