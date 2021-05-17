@@ -9,7 +9,7 @@ const bcrypt = require('bcryptjs');
 const Course = require('../models/course.model');
 const Constants = require('../helpers/constants');
 const { gmail } = require('googleapis/build/src/apis/gmail');
-
+const { ObjectId } = require('mongodb');
 
 
 
@@ -263,7 +263,10 @@ exports.enrollCourse = function (req, res, next) {
         }
         else {
             if (user) {
-                user.enrolledCourses.push(req.params.id);
+                if (user.enrolledCourses.includes(req.params.id))
+                return res.status(200).json({ message: "User already enrolled to this course" });;
+                
+                user.enrolledCourses.push(ObjectId(req.params.id));
 
                 user.save(function (err, updatedUser) {
                     if (err) {

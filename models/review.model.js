@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 //define review collection schema in MongoDB
 const ReviewSchema = mongoose.Schema({
     course: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Course',
         required: true
     },
     user: {

@@ -2,6 +2,8 @@ const Announcement = require('../models/announcement.model')
 const Comment = require('../models/comment.model')
 const Course = require('../models/course.model')
 const Section = require('../models/section.model')
+const User = require('../models/user.model')
+const Notification = require('../models/notification.model')
 const Constants = require('../helpers/constants')
 
 // exports.getCommentsWithAnnouncementId = function (req, res, next) {
@@ -72,6 +74,15 @@ exports.createAnnouncement = async function(req, res, next){
                 }
             });
         }
+        const enrolledUsers = await User.find({enrolledCourses: req.body.course}, {_id:1});
+        const notification = new Notification({
+            users: enrolledUsers,
+            target: { course: req.body.course },
+            performedBy: res.locals.user.sub,
+            action: Constants.NOTIFICATION_ACTIONS.POST_ANNOUNCEMENT
+        });
+        //Save the notification
+        await notification.save();
         //Save the announcement
         const savedAnnouncement = await announcement.save();
 

@@ -9,6 +9,7 @@ exports.createCourse = function (req, res, next) {
 
     //The instructor will be the user who send the request
     course.instructor = res.locals.user.sub;
+    course.status = "new";
 
     course.save(function (err, createdCourse) {
         if (err) {
@@ -90,7 +91,11 @@ exports.getCourseLearningDetails = function (req, res, next) {
             model: 'Section',
             populate: [{
                 path: 'lectures',
-                model: 'Lecture'
+                model: 'Lecture',
+                populate: {
+                    path: 'resources',
+                    model: 'Resource'
+                }
             },
             {
                 path: 'quiz',
@@ -115,7 +120,7 @@ exports.getCourseLearningDetails = function (req, res, next) {
 }
 
 exports.getCourseList = function (req, res, next) {
-    Course.find({ status: "Approved" })
+    Course.find({ status: "approved" })
         .populate('instructor', 'firstname lastname')
         .exec(
             function (err, result) {
@@ -133,7 +138,7 @@ exports.getCourseList = function (req, res, next) {
 }
 
 exports.getHotCourses = function (req, res, next) {
-    Course.find({ status: "Approved" },//)
+    Course.find({ status: "approved" },//)
         //.exec(
         function (err, result) {
             if (err) {
@@ -177,7 +182,7 @@ exports.submitCourseForApproval = function (req, res, next) {
             if (course.status) {
                 return res.status(200).json({ message: "This course has already been submitted for approval" })
             }
-            course.status = "Pending"
+            course.status = "pending"
             course.save(function (err) {
                 if (err) {
                     next(err);
@@ -192,7 +197,7 @@ exports.submitCourseForApproval = function (req, res, next) {
 
 exports.approveCourse = function (req, res, next) {
     const courseId = req.params.id;
-    Course.updateOne({ _id: courseId }, { status: "Approved" }, function (err) {
+    Course.updateOne({ _id: courseId }, { status: "approved" }, function (err) {
         if (err) {
             next(err);
         }
@@ -226,7 +231,7 @@ exports.searchCourse = async function (req, res, next) {
             searchQuery.push({$or: [{name: { "$regex": req.query.keyword, "$options": "i" }}, { instructor: {$in: users}} ]});
         }
         //Only search approved courses
-        searchQuery.push({status: "Approved"});
+        searchQuery.push({status: "approved"});
 
         //Sorting with price
         if (req.query.price) {
@@ -254,7 +259,7 @@ exports.searchCourse = async function (req, res, next) {
         //let count = await courses.count();
 
         if (courses.length) {
-            return res.status(200).json({message: "sucess", data: courses});
+            return res.status(200).json({message: "success", data: courses});
             //return res.status(200).json({message: "sucess", data: {courses: courses, count: count}});
         }
         else {

@@ -23,9 +23,6 @@ const CourseSchema = new mongoose.Schema({
   objectives: [{
     type: String
   }],
-  img: {
-    type:String
-  },
   img_url: {
     type: String
   },

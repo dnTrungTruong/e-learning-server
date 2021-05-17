@@ -5,7 +5,7 @@ const path = require('path');
 const config = require('../config.json')
 const s3Config = require('./s3');
 
-const maxSize = 20 * 1024 * 1024; //Max is 20mb
+const maxSize = 50 * 1024 * 1024; //Max is 50mb
 const resourcesDir = "/resources/";
 const tempDir = "/temp/"
 const __basedir = path.resolve();
@@ -23,7 +23,7 @@ let s3DocStorage = multerS3({
   metadata: metadataFunction,
   key: function (req, file, cb) {
     let newFileName = Date.now() + "-" + file.originalname;
-    let fullPath = "course_resources/" + req.params.section_id + '/' + newFileName;
+    let fullPath = 'course_resources/' + req.params.course_id + '/' + newFileName;
     cb(null, fullPath  )
   }
 });
@@ -93,6 +93,10 @@ let uploadImage = multer({
 
 //filter functions to check file type
 function checkFileType(file, cb) {
+  //Name contains any UTF-8 or UTF-16 characters is not allowed since AWS S3 Object Key may have issues
+  for (var i = 0; i < file.originalname.length; i++) {
+    if (file.originalname.charCodeAt(i) > 127 || file.originalname.charCodeAt(i) === 47) return cb('File name is invalid. Please dont use any UTF-8 or UTF-16 character.');
+  }
   // Allowed ext
   const fileExtensions = /doc|docx|ppt|rar|zip|txt|pdf/;
   const fileTypes = /doc|docx|vnd.ms-powerpoint|x-rar-compressed|zip|text|pdf/;

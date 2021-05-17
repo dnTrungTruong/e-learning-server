@@ -3,6 +3,7 @@ module.exports = errorHandler;
 function errorHandler(err, req, res, next) {
     if (typeof (err) === 'string') {
         // custom application error
+        console.log(err);
         return res.status(200).json({ message: err });
     }
 

@@ -39,18 +39,18 @@ exports.createResource = function(req, res, next){
     })  
 }
 
-exports.getResourceInfo = function (req, res, next) {
-    Resource.findById(req.params.id, function (err, resource) {
-        if (err) {
-            next(err);
-        }
-        else {
-            res.status(200).json({ data: resource });
-        }
-    });
-}
+// exports.getResourceInfo = function (req, res, next) {
+//     Resource.findById(req.params.id, function (err, resource) {
+//         if (err) {
+//             next(err);
+//         }
+//         else {
+//             res.status(200).json({ data: resource });
+//         }
+//     });
+// }
 
-exports.getResourceList = function (req, res ,next){
+exports.getResourcesByLecture = function (req, res ,next){
     Lecture.findById(req.params.id)
     .populate('resources')
     .exec(function(err, result) {
@@ -58,7 +58,7 @@ exports.getResourceList = function (req, res ,next){
             next(err);
         }
         else {
-            if (!result) {
+            if (!result.length) {
                 return res.status(200).json({ message: "No result"}); 
             }
             res.status(200).json({ data: result.resources });

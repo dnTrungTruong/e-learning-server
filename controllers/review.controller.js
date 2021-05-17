@@ -37,15 +37,15 @@ exports.getReviewsWithCourseId = function (req, res, next) {
     .populate({ path: 'user', select: ['_id', 'firstname', 'lastname']})
     .populate({ path: 'reply.user', select: ['firstname', 'lastname']})
     .sort({date: -1})
-    .exec(function (err, review) {
+    .exec(function (err, reviews) {
         if (err) {
             next(err);
         }
         else {
-            if (!review) {
+            if (!reviews.length) {
                 return res.status(200).json({message: "No result" });
             }
-            res.status(200).json({message: "success", data: review });
+            res.status(200).json({message: "success", data: reviews });
         }
     });
 }
