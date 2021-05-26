@@ -62,11 +62,11 @@ exports.getCourseDetails = function (req, res, next) {
         .populate({
             path: 'sections',
             model: 'Section',
-            select: {'_id': 1, 'name': 1, 'lectures': 1},
+            select: { '_id': 1, 'name': 1, 'lectures': 1 },
             populate: {
                 path: 'lectures',
                 model: 'Lecture',
-                select: {'_id': 1, 'name': 1}
+                select: { '_id': 1, 'name': 1 }
             }
         })
         .exec(function (err, course) {
@@ -85,7 +85,7 @@ exports.getCourseDetails = function (req, res, next) {
 exports.getCourseLearningDetails = function (req, res, next) {
     Course.findById(req.params.id)
         .populate('instructor', 'firstname lastname')
-        //.populate('sections', 'name')
+        .populate('subject', 'name')
         .populate({
             path: 'sections',
             model: 'Section',
@@ -117,6 +117,87 @@ exports.getCourseLearningDetails = function (req, res, next) {
                 res.status(200).json({ message: "success", data: course });
             }
         });
+}
+
+exports.getCourseListAll = async function (req, res, next) {
+    const limit = req.query.size ? parseInt(req.query.size) : 5;
+    const offset = req.query.page ? parseInt(req.query.page) * limit : 0;
+
+    var condition = {};
+    if (req.query.keyword) {
+        let users = await User.find({ $text: { $search: req.query.keyword } }, { _id: 1 });
+
+        if (req.query.status) {
+            condition = {
+                $and : [
+                    {status: req.query.status},
+                    {$or: [
+                        //{ $text: {$search: req.query.keyword} }, // Method 1: Using index
+                        { name: { "$regex": req.query.keyword, "$options": "i" } }, //Method 2: Using regex
+                        { instructor: { $in: users } }
+                    ]}
+                ]
+            }
+        }
+        else {
+            condition = {
+                $or: [
+                    //{ $text: {$search: req.query.keyword} }, // Method 1: Using index
+                    { name: { "$regex": req.query.keyword, "$options": "i" } }, //Method 2: Using regex
+                    { instructor: { $in: users } }
+                ]
+            }
+        }
+    }
+    else {
+        if (req.query.status) {
+            condition = {
+                status: req.query.status
+            };
+        }
+        else {
+            condition = {};
+        }
+    }
+    const options = {
+        sort: {status: -1},
+        select: 'name subject instructor img_url status type', 
+        populate: [
+            { path: 'subject', model: 'Subject', select: 'name'},
+            { path: 'instructor', model: 'User', select: 'firstname lastname'}
+        ],
+        offset: offset, 
+        limit: limit
+    }
+    Course.paginate(condition, options)
+    .then((data) => {
+        const returnData = {
+            totalItems: data.totalDocs,
+            courses: data.docs,
+            totalPages: data.totalPages,
+            currentPage: data.page - 1,
+        }
+        if (data.docs.length) {
+            res.status(200).json({ message: "success", data: returnData });
+        }
+        else {
+            res.status(200).json({ message: "No result" });
+        }
+    })
+    .catch((err) => {
+        next(err);
+    })
+}
+
+exports.getPendingCoursesCount = function (req, res, next) {
+    Course.countDocuments({status: "pending"}, function(err, count) {
+        if (err) {
+            next(err);
+        }
+        else {
+            res.status(200).json({ message: "success", data: count });
+        }
+    })
 }
 
 exports.getCourseList = function (req, res, next) {
@@ -210,15 +291,16 @@ exports.approveCourse = function (req, res, next) {
 
 exports.searchCourse = async function (req, res, next) {
 
+    //UPDATE: This search is done manually, theres a new way with pagination plugin
     try {
         let searchQuery = [];
         let sortBy = {};
 
         //Search for the subject_id to filter
-        if (req.query.sub) { 
-            sub = await Subject.findOne({name: { "$regex": req.query.sub, "$options": "i" }}, {_id:1});
+        if (req.query.sub) {
+            sub = await Subject.findOne({ name: { "$regex": req.query.sub, "$options": "i" } }, { _id: 1 });
             //Only filter with subject when we find a result
-            if (sub) { searchQuery.push({subject: sub._id});}
+            if (sub) { searchQuery.push({ subject: sub._id }); }
         }
         //Search for users who have name matched keyword
         //(OLD)
@@ -226,16 +308,16 @@ exports.searchCourse = async function (req, res, next) {
         //Method 2: { $text: {$search: ((req.query.keyword ? req.query.keyword : false))}} - Split keyword(string) into words and find names that matched any word
         //We're using method 2 to find instructor name and method 1 for course name
         if (req.query.keyword) {
-            let users = await User.find({$text: {$search: req.query.keyword}}, {_id:1});
+            let users = await User.find({ $text: { $search: req.query.keyword } }, { _id: 1 });
             //Search with keyword or instructor name
-            searchQuery.push({$or: [{name: { "$regex": req.query.keyword, "$options": "i" }}, { instructor: {$in: users}} ]});
+            searchQuery.push({ $or: [{ name: { "$regex": req.query.keyword, "$options": "i" } }, { instructor: { $in: users } }] });
         }
         //Only search approved courses
-        searchQuery.push({status: "approved"});
+        searchQuery.push({ status: "approved" });
 
         //Sorting with price
         if (req.query.price) {
-            sortBy.price = (req.query.price==="descending" ? "descending" : "ascending");
+            sortBy.price = (req.query.price === "descending" ? "descending" : "ascending");
         }
         //Sorting with reviews
         //if (req.query.review) {
@@ -248,25 +330,25 @@ exports.searchCourse = async function (req, res, next) {
         const pagination = req.query.pagination ? parseInt(req.query.pagination) : 10;
 
         let courses = await Course.find()
-        .and(searchQuery)
-        .sort(sortBy)
-        .skip((page - 1) * 1)
-        .limit(1)
-        .populate('instructor', 'firstname lastname');
+            .and(searchQuery)
+            .sort(sortBy)
+            .skip((page - 1) * 1)
+            .limit(1)
+            .populate('instructor', 'firstname lastname');
 
 
         //Find how many results the query really had (not working)
         //let count = await courses.count();
 
         if (courses.length) {
-            return res.status(200).json({message: "success", data: courses});
+            return res.status(200).json({ message: "success", data: courses });
             //return res.status(200).json({message: "sucess", data: {courses: courses, count: count}});
         }
         else {
-            return res.status(200).json({message: "No result"});
+            return res.status(200).json({ message: "No result" });
         }
     }
-    catch(err) {
+    catch (err) {
         next(err);
     }
 }
@@ -286,7 +368,30 @@ exports.editCourse = function (req, res, next) {
             course.objectives = req.body.objectives || course.objectives;
             course.price = req.body.price || course.price;
             course.img_url = req.body.img_url || course.img_url;
-            
+
+            course.save(function (err, updatedCourse) {
+                if (err) {
+                    next(err);
+                }
+                else {
+                    res.status(200).json({ message: "success", data: updatedCourse })
+                }
+            })
+        }
+    })
+}
+
+exports.editCourseTags = function (req, res, next) {
+    Course.findById(req.params.id, function (err, course) {
+        if (err) {
+            next(err);
+        }
+        else {
+            if (!course) {
+                return res.status(200).json({ message: "Provided course is not valid" });
+            }
+            course.tags = req.body.tags || course.tags;
+
             course.save(function (err, updatedCourse) {
                 if (err) {
                     next(err);

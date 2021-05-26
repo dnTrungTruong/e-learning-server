@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const mongoosePaginate = require("mongoose-paginate-v2");
 
 //define review collection schema in MongoDB
 const ReviewSchema = mongoose.Schema({
@@ -37,4 +38,7 @@ const ReviewSchema = mongoose.Schema({
         default: Date.now
     }
 });
+
+ReviewSchema.plugin(mongoosePaginate);
+
 module.exports = mongoose.model('Reviews', ReviewSchema);

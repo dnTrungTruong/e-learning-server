@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Subject = require('./subject.model')
+const mongoosePaginate = require("mongoose-paginate-v2");
 
 //define course collection schema in MongoDB
 const CourseSchema = new mongoose.Schema({
@@ -31,7 +32,8 @@ const CourseSchema = new mongoose.Schema({
       required: true  
   },
   status: {
-    type: String
+    type: String,
+    default: "new"
   },
   sections: [{
     type: mongoose.Schema.Types.ObjectId,
@@ -47,9 +49,17 @@ const CourseSchema = new mongoose.Schema({
   reviewsNumber: {
     type: Number,
     default: 0
-  }
+  },
+  tags: [{
+    type: String
+  }]
 });
 CourseSchema.index({name: 'text'});
+
+CourseSchema.index({status: -1, name: 1, type: 1, subject: 1});
+
+CourseSchema.plugin(mongoosePaginate);
+
 //use schema for 'course' collection schema
 const Course = mongoose.model('Course', CourseSchema);
 

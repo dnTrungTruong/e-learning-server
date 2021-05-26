@@ -310,14 +310,18 @@ exports.authorizeCourseWithReview = function () {
                                     return res.status(200).json({ message: 'Provided review is not valid'});
                                 }
                                 if (req.method == "PUT") {
+                                    //Only insstructor of the course can make reply
                                     if (!user.createdCourses.includes(review.course)) {
                                         return res.status(401).json({ message: 'Unauthorized' });
                                     }
                                     next(); 
                                 }
-                                else {
-                                    if (!user.enrolledCourses.includes(review.course)) {
-                                        return res.status(401).json({ message: 'Unauthorized' });
+                                else { //DELETE Method
+                                    if(!(user.role == Role.Admin || user.role == Role.Moderator)) {
+                                        //Not Moderator, Admin then only user who made the review can delete
+                                        if (review.user != user._id) {
+                                            return res.status(401).json({ message: 'Unauthorized' });
+                                        }
                                     }
                                     next(); 
                                 }

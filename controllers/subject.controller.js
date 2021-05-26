@@ -1,7 +1,8 @@
 const Subject = require('../models/subject.model')
 
 exports.createSubject = function(req, res, next){
-    const subject = new Subject(req.body);
+    const subject = new Subject();
+    subject.name = req.body.name;
 
     subject.save(function (err, createdSubject) {
         if (err) {

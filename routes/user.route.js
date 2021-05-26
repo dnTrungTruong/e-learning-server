@@ -71,17 +71,27 @@ UserController.sendVerifyMail)
 
 router.get('/verification/verify/:userId/:secretCode', UserController.verifyMail)
 
+router.get('/',
+Authorization.authorize(Constants.USER_ROLES.ADMIN),
+UserController.getUsers)
+
 router.put('/change-password/:id', 
 Validation.areParamsValidObjectIdCasting(),
 Authorization.authorize(), 
 Authorization.authorizeIdentity(),
 UserController.changePassword)
 
+router.put('/edit-for-admin/:id', 
+Validation.areParamsValidObjectIdCasting(),
+Authorization.authorize(Constants.USER_ROLES.ADMIN), 
+UserController.editInfoForAdmin)
+
 router.put('/:id', 
 Validation.areParamsValidObjectIdCasting(),
 Authorization.authorize(), 
 Authorization.authorizeIdentity(),
 UserController.editInfo)
+
 
 
 

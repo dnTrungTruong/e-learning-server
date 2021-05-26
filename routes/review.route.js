@@ -3,6 +3,12 @@ const ReviewController = require('../controllers/review.controller');
 const Authorization = require('../helpers/authorization')
 const router = express.Router();
 const Validation = require('../helpers/validation');
+const Constants = require('../helpers/constants');
+
+router.get('/admin/:id', 
+Validation.areParamsValidObjectIdCasting(),
+Authorization.authorize([Constants.USER_ROLES.MODERATOR, Constants.USER_ROLES.ADMIN]),
+ReviewController.getReviewsForAdmin)
 
 
 router.get('/:id', 

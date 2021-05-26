@@ -137,6 +137,37 @@ exports.authenticateWithPassport = async function (req, res, next) {
     }
 }
 
+exports.getUsers = function (req, res, next) {
+    const limit = req.query.size ? parseInt(req.query.size) : 5;
+    const offset = req.query.page ? parseInt(req.query.page) * limit : 0;
+
+    const condition = req.query.keyword ? 
+    {$or: [
+        {$text: {$search: req.query.keyword}},
+        {email: { "$regex": req.query.keyword, "$options": "i" }}
+    ]}
+    : {};
+    
+    User.paginate(condition, { select: '-password -gender -birthday -enrolledCourses -createdCourses', offset, limit })
+    .then((data) => {
+        const returnData = {
+            totalItems: data.totalDocs,
+            users: data.docs,
+            totalPages: data.totalPages,
+            currentPage: data.page - 1,
+        }
+        if (data.docs.length) {
+            res.status(200).json({ message: "success", data: returnData });
+        }
+        else {
+            res.status(200).json({ message: "No result" });
+        }
+    })
+    .catch((err) => {
+        next(err);
+    })
+}
+
 //get user info
 exports.getUserInfo = function (req, res, next) {
     User.findById(req.params.id, function (err, user) {
@@ -208,6 +239,33 @@ exports.editInfo = function (req, res, next) {
                 user.firstname = req.body.firstname || user.firstname;
                 user.lastname = req.body.lastname || user.lastname;
                 user.birthday = req.body.birthday || user.birthday;
+
+                user.save(function (err, updatedUser) {
+                    if (err) {
+                        next(err);
+                    }
+                    else {
+                        res.status(200).json({ message: "success", data: updatedUser })
+                    }
+                })
+            }
+            else {
+                res.status(200).json({ message: "Provided user is not valid" });
+            }
+
+        }
+    })
+}
+
+exports.editInfoForAdmin = function (req, res, next) {
+    User.findById(req.params.id, function (err, user) {
+        if (err) {
+            next(err);
+        }
+        else {
+            if (user) {
+                user.role = req.body.role || user.role;
+                user.status = req.body.status || user.status;
 
                 user.save(function (err, updatedUser) {
                     if (err) {

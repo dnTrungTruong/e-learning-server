@@ -50,6 +50,56 @@ exports.getReviewsWithCourseId = function (req, res, next) {
     });
 }
 
+exports.getReviewsForAdmin = async function (req, res, next) {
+    const limit = req.query.size ? parseInt(req.query.size) : 5;
+    const offset = req.query.page ? parseInt(req.query.page) * limit : 0;
+
+    var condition = {};
+    if (req.query.keyword) {
+        let users = await User.find({ $text: { $search: req.query.keyword } }, { _id: 1 });
+
+        condition = {
+            $and : [
+                { course: req.params.id },
+                {$or: [
+                    { reply: { user: { $in: users } } },
+                    { user: { $in: users } }
+                ]}
+            ]
+        }
+    }
+    else {
+        condition = { course: req.params.id };
+    }
+    const options = {
+        sort: {date: -1},
+        populate: [
+            { path: 'user', model: 'User', select: 'firstname lastname'},
+            { path: 'reply.user', model: 'User', select: 'firstname lastname'}
+        ],
+        offset: offset, 
+        limit: limit
+    }
+    Review.paginate(condition, options)
+    .then((data) => {
+        const returnData = {
+            totalItems: data.totalDocs,
+            reviews: data.docs,
+            totalPages: data.totalPages,
+            currentPage: data.page - 1,
+        }
+        if (data.docs.length) {
+            res.status(200).json({ message: "success", data: returnData });
+        }
+        else {
+            res.status(200).json({ message: "No result" });
+        }
+    })
+    .catch((err) => {
+        next(err);
+    })
+}
+
 exports.replyReview = function (req, res ,next) {
     Review.findById(req.params.id, function (err, review) {
         if (err) {
@@ -86,7 +136,7 @@ exports.deleteReview = async function(req, res, next){
         await Course.updateOne({ _id: deletedReview.course},
             {
                 $set: {
-                    avgRate: avg, numberRate: rates.length
+                    avgRate: avg, numberRate: reviews.length
                 }
             });
         res.status(200).json({message: "success", data : deletedReview})

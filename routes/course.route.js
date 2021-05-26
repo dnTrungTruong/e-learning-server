@@ -7,7 +7,16 @@ const router = express.Router();
 
 router.get('/', CourseController.getCourseList)
 
+router.get('/all', 
+//Authorization.authorize([Constants.USER_ROLES.MODERATOR, Constants.USER_ROLES.ADMIN]),
+CourseController.getCourseListAll)
+
 router.get('/hot', CourseController.getHotCourses)
+
+router.get('/count-pending-courses', 
+Authorization.authorize([Constants.USER_ROLES.MODERATOR, Constants.USER_ROLES.ADMIN]),
+CourseController.getPendingCoursesCount)
+
 
 router.get('/search/', CourseController.searchCourse)
 
@@ -45,6 +54,11 @@ Validation.areParamsValidObjectIdCasting(),
 Authorization.authorize([Constants.USER_ROLES.INSTRUCTOR, Constants.USER_ROLES.MODERATOR, Constants.USER_ROLES.ADMIN]),
 Authorization.authorizeCreatedCourse(),
 CourseController.editCourse)
+
+router.put('/tags/:id',
+Validation.areParamsValidObjectIdCasting(),
+Authorization.authorize([Constants.USER_ROLES.MODERATOR, Constants.USER_ROLES.ADMIN]),
+CourseController.editCourseTags)
 
 router.delete('/:id', 
 Validation.areParamsValidObjectIdCasting(),
