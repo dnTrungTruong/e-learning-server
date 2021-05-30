@@ -18,6 +18,9 @@ const CourseSchema = new mongoose.Schema({
       ref: 'User', //refer to collection users in DB in order to use populate
       required: true
   },
+  overview: {
+    type: String
+  },
   description: {
       type: String
   },

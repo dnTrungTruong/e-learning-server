@@ -297,8 +297,8 @@ exports.searchCourse = async function (req, res, next) {
         let sortBy = {};
 
         //Search for the subject_id to filter
-        if (req.query.sub) {
-            sub = await Subject.findOne({ name: { "$regex": req.query.sub, "$options": "i" } }, { _id: 1 });
+        if (req.query.subject) {
+            sub = await Subject.findOne({ name: { "$regex": req.query.subject, "$options": "i" } }, { _id: 1 });
             //Only filter with subject when we find a result
             if (sub) { searchQuery.push({ subject: sub._id }); }
         }
@@ -314,7 +314,6 @@ exports.searchCourse = async function (req, res, next) {
         }
         //Only search approved courses
         searchQuery.push({ status: "approved" });
-
         //Sorting with price
         if (req.query.price) {
             sortBy.price = (req.query.price === "descending" ? "descending" : "ascending");
@@ -333,7 +332,7 @@ exports.searchCourse = async function (req, res, next) {
             .and(searchQuery)
             .sort(sortBy)
             .skip((page - 1) * 1)
-            .limit(1)
+            .limit(pagination)
             .populate('instructor', 'firstname lastname');
 
 
