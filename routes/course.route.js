@@ -7,6 +7,7 @@ const router = express.Router();
 
 router.get('/', CourseController.getCourseList)
 
+
 router.get('/all', 
 //Authorization.authorize([Constants.USER_ROLES.MODERATOR, Constants.USER_ROLES.ADMIN]),
 CourseController.getCourseListAll)

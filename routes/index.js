@@ -11,6 +11,7 @@ const reviewRoute = require('./review.route')
 const announcementRoute = require('./announcement.route')
 const notificationRoute = require('./notification.route')
 const resourceRoute = require('./resource.route')
+const webhookRoute = require('./webhook.route')
 
 //index of routes
 router.get('/', function (req, res) {
@@ -28,6 +29,7 @@ router.use('/review', reviewRoute)
 router.use('/announcement', announcementRoute)
 router.use('/notification', notificationRoute)
 router.use('/resource', resourceRoute)
+router.use('/webhook', webhookRoute)
 
 //export router
 module.exports = router;

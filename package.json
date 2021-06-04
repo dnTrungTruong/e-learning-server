@@ -11,10 +11,12 @@
   "license": "ISC",
   "dependencies": {
     "@hapi/joi": "^17.1.1",
+    "actions-on-google": "^2.14.0",
     "aws-sdk": "^2.820.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "crypto-random-string": "^3.3.0",
+    "dialogflow-fulfillment": "^0.6.1",
     "express": "^4.17.1",
     "express-jwt": "^6.0.0",
     "googleapis": "^73.0.0",
