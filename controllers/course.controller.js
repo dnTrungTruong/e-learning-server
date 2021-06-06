@@ -221,21 +221,19 @@ exports.getCourseList = function (req, res, next) {
 }
 
 exports.getHotCourses = function (req, res, next) {
-    Course.find({ status: "approved" },//)
-        //.exec(
-        function (err, result) {
-            if (err) {
-                next(err);
-            }
-            else {
-                if (!result.length) {
-                    return res.status(200).json({ message: "No result" });
-                }
-                //Need to implement hot search not random
-                let sortedResult = result.sort(() => 0.5 - Math.random()).slice(0, 4);
-                res.status(200).json({ message: "success", data: sortedResult });
-            }
-        })
+    Course.find({ status: "approved", tags: "hot" })
+    .limit(4)
+    .then((result) => {
+        if (!result.length) {
+            return res.status(200).json({ message: "No result" });
+        }
+        //Mix courses up and get only 4
+        let sortedResult = result.sort(() => 0.5 - Math.random());
+        res.status(200).json({ message: "success", data: sortedResult });
+    })
+    .catch((err) => {
+        next(err);
+    })
 }
 
 exports.getCourseListByStatus = function (req, res, next) {

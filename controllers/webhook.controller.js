@@ -1,6 +1,11 @@
 const dfff = require('dialogflow-fulfillment');
 const Subject = require('../models/subject.model')
-const Course = require('../models/course.model')
+const Course = require('../models/course.model');
+const User = require('../models/user.model');
+const cryptoRandomString = require('crypto-random-string');
+const SecretCode = require('../models/secretcode.model');
+const emailService = require('../helpers/emailService');
+const config = require('config.json');
 
 exports.chatbotWebhookCall = function (req, res, next) {
     const agent = new dfff.WebhookClient({
@@ -15,6 +20,7 @@ exports.chatbotWebhookCall = function (req, res, next) {
     var intentMap = new Map();
     intentMap.set('listAvailableSubjects', listSubjects);
     intentMap.set('suggestCoursesBySubject', suggestCoursesBySubject);
+    intentMap.set('passwordRecoverySendMail', sendPasswordRecoveryMail);
 
     agent.handleRequest(intentMap);
 }
@@ -101,6 +107,7 @@ function suggestCoursesBySubject(agent) {
                 return Course.find({ tags: "hot" })
                     .and([{ status: "approved" }])
                     .populate('instructor', 'firstname lastname')
+                    .limit(3)
                     .then((result) => {
                         if (!result.length) {
                             return agent.add("Please try again.");
@@ -127,9 +134,10 @@ function suggestCoursesBySubject(agent) {
             return Course.find({ subject: subject._id })
                 .and([{ status: "approved" }])
                 .populate('instructor', 'firstname lastname')
+                .limit(3)
                 .then((result) => {
                     if (!result.length) {
-                        return agent.add("I'm sorry, but I couldn't find any match courses.");
+                        return agent.add(`I'm sorry, but I couldn't find any ${subjectName} courses.`);
                     }
 
                     agent.add("Check out what I found");
@@ -153,3 +161,50 @@ function suggestCoursesBySubject(agent) {
         })
 }
 
+function sendPasswordRecoveryMail(agent) {
+    const recoveryUrl = "http://localhost:4200/password-recovery";
+    var userEmail = agent.context.get("awaiting_email").parameters.email;
+    console.log(userEmail);
+    return User.findOne({ email: userEmail })
+            .then((user) => {
+                if (!user) {
+                    return agent.add("I'm sorry. The provided email address is not registered or not verified!")
+                }
+                else {
+                    const secretCode = cryptoRandomString({
+                        length: 6,
+                    });
+                    const newCode = new SecretCode({
+                        code: secretCode,
+                        email: userEmail,
+                    });
+                    return newCode.save()
+                            .then((result) => {
+                                console.log(result);
+                                const data = {
+                                    from: config.EMAIL_USERNAME,
+                                    to: userEmail,
+                                    subject: "E-Learning Password Recovery",
+                                    text: `Please use the following link within the next 10 minutes to reset your password on E-Learning: ${recoveryUrl}/${userEmail}/${secretCode}`,
+                                    html: `<p>Please use the following link within the next 10 minutes to reset your password on E-Learning: <a href="${recoveryUrl}/${userEmail}/${secretCode}">${recoveryUrl}/${userEmail}/${secretCode}</a></p>`,
+                                };
+        
+                                return emailService.sendMail(data)
+                                        .then((result) => {
+                                            console.log(result);
+                                            agent.add("OK. Everything is done.");
+                                            return agent.add("We've sent to your email address an mail to help you to recover your password. Please check your mail.");
+                                        })
+                                        .catch((err) => {
+                                            return agent.add("Something went wrong. " + err);
+                                        })
+                            })
+                            .catch((err) => {
+                                agent.add("Something went wrong. " + err);
+                            })
+                }
+            })
+            .catch((err) => {
+                agent.add("Something went wrong. " + err);
+            })
+}

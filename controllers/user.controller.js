@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const Course = require('../models/course.model');
 const Constants = require('../helpers/constants');
-const { gmail } = require('googleapis/build/src/apis/gmail');
+// const { gmail } = require('googleapis/build/src/apis/gmail');
 const { ObjectId } = require('mongodb');
 
 
@@ -494,7 +494,6 @@ exports.verifySecretCode = async function (req, res, next) {
     // }
     try {
         const response = await SecretCode.findOne({ email, code });
-
 
         if (!response) {
             return res.status(200).json({ message: "The entered code is not correct. Please make sure to enter the code in the requested time interval." });
