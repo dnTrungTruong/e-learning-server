@@ -6,8 +6,8 @@ const User = require('../models/user.model')
 const Role = require('../helpers/role')
 
 passport.use(new GoogleStrategy({
-    clientID: config.GOOGLE_CLIENT_ID,
-    clientSecret: config.GOOGLE_CLIENT_SECRET,
+    clientID: config.GOOGLE_PASSPORT_CLIENT_ID,
+    clientSecret: config.GOOGLE_PASSPORT_CLIENT_SECRET,
     callbackURL: "http://localhost:3000/api/user/auth/google/callback/"
   },
   function(accessToken, refreshToken, profile, done) {

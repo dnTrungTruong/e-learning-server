@@ -5,7 +5,6 @@ const router = express.Router();
 const Validation = require('../helpers/validation');
 
 router.get('/', 
-Validation.areParamsValidObjectIdCasting(),
 Authorization.authorize(),
 NotificationController.getNotifications)
 

@@ -164,7 +164,6 @@ function suggestCoursesBySubject(agent) {
 function sendPasswordRecoveryMail(agent) {
     const recoveryUrl = "http://localhost:4200/password-recovery";
     var userEmail = agent.context.get("awaiting_email").parameters.email;
-    console.log(userEmail);
     return User.findOne({ email: userEmail })
             .then((user) => {
                 if (!user) {
@@ -180,7 +179,6 @@ function sendPasswordRecoveryMail(agent) {
                     });
                     return newCode.save()
                             .then((result) => {
-                                console.log(result);
                                 const data = {
                                     from: config.EMAIL_USERNAME,
                                     to: userEmail,
@@ -191,7 +189,6 @@ function sendPasswordRecoveryMail(agent) {
         
                                 return emailService.sendMail(data)
                                         .then((result) => {
-                                            console.log(result);
                                             agent.add("OK. Everything is done.");
                                             return agent.add("We've sent to your email address an mail to help you to recover your password. Please check your mail.");
                                         })
