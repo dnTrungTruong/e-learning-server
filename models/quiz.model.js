@@ -13,6 +13,7 @@ const QuizSchema = new mongoose.Schema({
     },
     course: {
         type: mongoose.Schema.Types.ObjectId,
+        ref: 'Course',
         required: true
     },
     questions: [{
@@ -25,7 +26,15 @@ const QuizSchema = new mongoose.Schema({
         correctAnswer: {
             type: String
         }
-    }]
+    }],
+    limitTime: {
+        type: Number,
+        require: true
+    },
+    isFinal: {
+        type: Boolean,
+        default: false
+    }
 });
 
 //use schema for 'quiz' collection schema

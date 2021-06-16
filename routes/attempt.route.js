@@ -1,5 +1,5 @@
 const express = require('express');
-const QuizController = require('../controllers/quiz.controller');
+const AttemptController = require('../controllers/attempt.controller');
 const Authorization = require('../helpers/authorization');
 const Validation = require('../helpers/validation');
 const Constants = require('../helpers/constants')
@@ -7,29 +7,41 @@ const Constants = require('../helpers/constants')
 const router = express.Router();
 
 
-router.get('/:id', 
+router.get('/attempt-by-quiz/:id', 
 Validation.areParamsValidObjectIdCasting(),
-QuizController.getQuiz)
+Authorization.authorize(),
+AttemptController.getAttemptByQuiz)
 
-// router.post('/submit/:id', 
-// Validation.areParamsValidObjectIdCasting(),
-// QuizController.submitQuiz)
+router.get('/:id', //courseId
+Validation.areParamsValidObjectIdCasting(),
+Authorization.authorize(),
+AttemptController.getAttempt)
 
-router.post('/',
-// Authorization.authorize([Constants.USER_ROLES.INSTRUCTOR, Constants.USER_ROLES.MODERATOR, Constants.USER_ROLES.ADMIN]),
-// Authorization.authorizeCreatedCourseWithLecture(),
-QuizController.createQuiz)
+
+router.post('/', //courseId
+Authorization.authorize(),
+AttemptController.createAttempt)
 
 router.put('/:id',
 Validation.areParamsValidObjectIdCasting(),
 // Authorization.authorize([Constants.USER_ROLES.INSTRUCTOR, Constants.USER_ROLES.MODERATOR, Constants.USER_ROLES.ADMIN]),
 // Authorization.authorizeCreatedCourseWithLecture(),
-QuizController.editQuiz)
+Authorization.authorize(),
+AttemptController.putNewAttempt)
 
-router.delete('/:id',
+router.put('/update/:id',
 Validation.areParamsValidObjectIdCasting(),
 // Authorization.authorize([Constants.USER_ROLES.INSTRUCTOR, Constants.USER_ROLES.MODERATOR, Constants.USER_ROLES.ADMIN]),
 // Authorization.authorizeCreatedCourseWithLecture(),
-QuizController.deleteQuiz)
+Authorization.authorize(),
+AttemptController.updateUserAnswers)
+
+router.put('/submit/:id',
+Validation.areParamsValidObjectIdCasting(),
+// Authorization.authorize([Constants.USER_ROLES.INSTRUCTOR, Constants.USER_ROLES.MODERATOR, Constants.USER_ROLES.ADMIN]),
+// Authorization.authorizeCreatedCourseWithLecture(),
+Authorization.authorize(),
+AttemptController.submitAttempt)
+
 
 module.exports = router

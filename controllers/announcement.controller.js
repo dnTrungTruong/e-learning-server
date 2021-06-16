@@ -6,23 +6,6 @@ const User = require('../models/user.model')
 const Notification = require('../models/notification.model')
 const Constants = require('../helpers/constants')
 
-// exports.getCommentsWithAnnouncementId = function (req, res, next) {
-//     Comment.find({announcement: req.params.id})
-//     .populate({ path: 'user', select: ['_id', 'firstname', 'lastname']})
-//     .populate({ path: 'replies.user', select: ['_id', 'firstname', 'lastname']})
-//     .sort({date: -1})
-//     .exec(function (err, comment) {
-//         if (err) {
-//             next(err);
-//         }
-//         else {
-//             if (!comment) {
-//                 return res.status(200).json({message: "No result" });
-//             }
-//             res.status(200).json({message: "success", data: comment });
-//         }
-//     });
-// }
 
 exports.getAnnouncementsWithCourseId = function (req, res, next) {
     Announcement.find({course: req.params.id})

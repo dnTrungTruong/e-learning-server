@@ -14,6 +14,11 @@ router.get('/listbysection/:section_id', FileController.getListFiles)
 
 router.get('/presignedurl/:course_id', FileController.uploadVideo)
 
+router.get('/s3/certificate/:filename',
+//Authorization.authorize(),
+//Authorization.authorizeCourseWithFile(),
+FileController.downloadCertificate)
+
 router.get('/s3/resource/:course_id/:filename',
 //Authorization.authorize(),
 //Authorization.authorizeCourseWithFile(),
@@ -22,7 +27,8 @@ FileController.downloadDoc)
 router.get('/s3/:course_id/:filename',
 //Authorization.authorize(),
 //Authorization.authorizeCourseWithFile(),
-FileController.download)
+FileController.downloadVideo)
+
 
 router.post('/image/',
 FileController.uploadImage)

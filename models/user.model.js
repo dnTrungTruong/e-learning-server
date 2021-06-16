@@ -48,7 +48,11 @@ const UserSchema = new mongoose.Schema({
   status: {
     type: String,
     default: "active"
-  }
+  },
+  attempts: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Attemp'
+  }]
 });
 UserSchema.index({firstname: 'text', lastname: 'text'});
 

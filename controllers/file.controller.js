@@ -2,7 +2,6 @@ const upload = require("../helpers/upload");
 const Resource = require('../models/resource.model')
 const path = require('path');
 const fs = require('fs');
-// const cloudinary = require('cloudinary').v2;
 const config = require('../config.json')
 const s3 = require('../helpers/s3');
 const { nextTick } = require("process");
@@ -172,7 +171,7 @@ exports.getListFiles = (req, res) => {
   // });
 };
 
-exports.download = (req, res, next) => {
+exports.downloadVideo = (req, res, next) => {
   let keyName = "course_videos" + "/" + req.params.course_id + "/" + req.params.filename;
   
   let params = {
@@ -208,6 +207,25 @@ exports.downloadDoc = (req, res, next) => {
   let params = {
     Bucket: config.AWS_BUCKET_NAME,
     Key: 'course_resources/' + req.params.course_id + '/' + req.params.filename
+  };
+  // s3.getSignedUrlPromise('getObject', params).then(function(url) {
+  //   return res.status(200).json({message: "sucess", data: url});
+  // })
+
+  res.setHeader('Content-Disposition', 'attachment');
+ 
+  s3.getObject(params)
+    .createReadStream()
+      .on('error', function(err){
+        res.status(200).json({message: err.message});
+    }).pipe(res);
+
+};
+
+exports.downloadCertificate = (req, res, next) => {
+  let params = {
+    Bucket: config.AWS_BUCKET_NAME,
+    Key: 'course_certificates/' + req.params.filename
   };
   // s3.getSignedUrlPromise('getObject', params).then(function(url) {
   //   return res.status(200).json({message: "sucess", data: url});
