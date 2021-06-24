@@ -14,6 +14,10 @@ CourseController.getCourseListAll)
 
 router.get('/hot', CourseController.getHotCourses)
 
+router.get('/new', CourseController.getNewCourses)
+
+router.get('/random', CourseController.getRandomCourses)
+
 router.get('/count-pending-courses', 
 Authorization.authorize([Constants.USER_ROLES.MODERATOR, Constants.USER_ROLES.ADMIN]),
 CourseController.getPendingCoursesCount)

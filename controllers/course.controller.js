@@ -3,7 +3,7 @@ const User = require('../models/user.model')
 const Subject = require('../models/subject.model');
 const { search } = require('../routes/course.route');
 const { query } = require('express');
-
+const Constants = require('../helpers/constants')
 
 
 exports.createCourse = function (req, res, next) {
@@ -11,7 +11,7 @@ exports.createCourse = function (req, res, next) {
 
     //The instructor will be the user who send the request
     course.instructor = res.locals.user.sub;
-    course.status = "new";
+    course.status = Constants.COURSE_STATUS.APPROVED;
 
     course.save(function (err, createdCourse) {
         if (err) {
@@ -131,13 +131,15 @@ exports.getCourseListAll = async function (req, res, next) {
 
         if (req.query.status) {
             condition = {
-                $and : [
-                    {status: req.query.status},
-                    {$or: [
-                        //{ $text: {$search: req.query.keyword} }, // Method 1: Using index
-                        { name: { "$regex": req.query.keyword, "$options": "i" } }, //Method 2: Using regex
-                        { instructor: { $in: users } }
-                    ]}
+                $and: [
+                    { status: req.query.status },
+                    {
+                        $or: [
+                            //{ $text: {$search: req.query.keyword} }, // Method 1: Using index
+                            { name: { "$regex": req.query.keyword, "$options": "i" } }, //Method 2: Using regex
+                            { instructor: { $in: users } }
+                        ]
+                    }
                 ]
             }
         }
@@ -162,37 +164,37 @@ exports.getCourseListAll = async function (req, res, next) {
         }
     }
     const options = {
-        sort: {status: -1},
-        select: 'name subject instructor img_url status type', 
+        sort: { status: -1 },
+        select: 'name subject instructor img_url status type',
         populate: [
-            { path: 'subject', model: 'Subject', select: 'name'},
-            { path: 'instructor', model: 'User', select: 'firstname lastname'}
+            { path: 'subject', model: 'Subject', select: 'name' },
+            { path: 'instructor', model: 'User', select: 'firstname lastname' }
         ],
-        offset: offset, 
+        offset: offset,
         limit: limit
     }
     Course.paginate(condition, options)
-    .then((data) => {
-        const returnData = {
-            totalItems: data.totalDocs,
-            courses: data.docs,
-            totalPages: data.totalPages,
-            currentPage: data.page - 1,
-        }
-        if (data.docs.length) {
-            res.status(200).json({ message: "success", data: returnData });
-        }
-        else {
-            res.status(200).json({ message: "No result" });
-        }
-    })
-    .catch((err) => {
-        next(err);
-    })
+        .then((data) => {
+            const returnData = {
+                totalItems: data.totalDocs,
+                courses: data.docs,
+                totalPages: data.totalPages,
+                currentPage: data.page - 1,
+            }
+            if (data.docs.length) {
+                res.status(200).json({ message: "success", data: returnData });
+            }
+            else {
+                res.status(200).json({ message: "No result" });
+            }
+        })
+        .catch((err) => {
+            next(err);
+        })
 }
 
 exports.getPendingCoursesCount = function (req, res, next) {
-    Course.countDocuments({status: "pending"}, function(err, count) {
+    Course.countDocuments({ status: Constants.COURSE_STATUS.PENDING }, function (err, count) {
         if (err) {
             next(err);
         }
@@ -203,7 +205,7 @@ exports.getPendingCoursesCount = function (req, res, next) {
 }
 
 exports.getCourseList = function (req, res, next) {
-    Course.find({ status: "approved" })
+    Course.find({ status: Constants.COURSE_STATUS.APPROVED })
         .populate('instructor', 'firstname lastname')
         .exec(
             function (err, result) {
@@ -220,20 +222,56 @@ exports.getCourseList = function (req, res, next) {
             })
 }
 
-exports.getHotCourses = function (req, res, next) {
-    Course.find({ status: "approved", tags: "hot" })
-    .limit(4)
-    .then((result) => {
-        if (!result.length) {
+exports.getNewCourses = function (req, res, next) {
+    Course.find({ status: Constants.COURSE_STATUS.APPROVED, tags: "new" })
+        .limit(5)
+        .populate('instructor', 'firstname lastname')
+        .then((result) => {
+            if (!result.length) {
+                return res.status(200).json({ message: "No result" });
+            }
+            //Mix courses up and get only 4
+            let sortedResult = result.sort(() => 0.5 - Math.random());
+            res.status(200).json({ message: "success", data: sortedResult });
+        })
+        .catch((err) => {
+            next(err);
+        })
+}
+
+
+exports.getRandomCourses = async function (req, res, next) {
+    try {
+        const randomCourses = await Course.aggregate([
+            { $match: { status: Constants.COURSE_STATUS.APPROVED }},
+            { $sample: { size : 8 }}
+        ]);
+        await User.populate(randomCourses, {path: "instructor", select: {firstname: 1, lastname: 1}});
+        if (!randomCourses.length) {
             return res.status(200).json({ message: "No result" });
         }
-        //Mix courses up and get only 4
-        let sortedResult = result.sort(() => 0.5 - Math.random());
-        res.status(200).json({ message: "success", data: sortedResult });
-    })
-    .catch((err) => {
+        res.status(200).json({ message: "success", data: randomCourses });
+    }
+    catch (err) {
         next(err);
-    })
+    }
+        
+}
+
+exports.getHotCourses = function (req, res, next) {
+    Course.find({ status: Constants.COURSE_STATUS.APPROVED, tags: "hot" })
+        .limit(4)
+        .then((result) => {
+            if (!result.length) {
+                return res.status(200).json({ message: "No result" });
+            }
+            //Mix courses up and get only 4
+            let sortedResult = result.sort(() => 0.5 - Math.random());
+            res.status(200).json({ message: "success", data: sortedResult });
+        })
+        .catch((err) => {
+            next(err);
+        })
 }
 
 exports.getCourseListByStatus = function (req, res, next) {
@@ -313,7 +351,7 @@ exports.searchCourse = async function (req, res, next) {
             searchQuery.push({ $or: [{ name: { "$regex": req.query.keyword, "$options": "i" } }, { instructor: { $in: users } }] });
         }
         //Only search approved courses
-        searchQuery.push({ status: "approved" });
+        searchQuery.push({ status: Constants.COURSE_STATUS.APPROVED });
         //Sorting with price
         if (req.query.price) {
             sortBy.price = (req.query.price === "descending" ? "descending" : "ascending");
@@ -324,28 +362,58 @@ exports.searchCourse = async function (req, res, next) {
         //}
         //------------------
 
-        //Pagination
-        const page = req.query.page ? parseInt(req.query.page) : 1;
-        const pagination = req.query.pagination ? parseInt(req.query.pagination) : 10;
+        //Pagination (OLD)
+        // const page = req.query.page ? parseInt(req.query.page) : 1;
+        // const pagination = req.query.pagination ? parseInt(req.query.pagination) : 10;
 
-        let courses = await Course.find()
-            .and(searchQuery)
-            .sort(sortBy)
-            .skip((page - 1) * 1)
-            .limit(pagination)
-            .populate('instructor', 'firstname lastname');
+        // let courses = await Course.find()
+        //     .and(searchQuery)
+        //     .sort(sortBy)
+        //     .skip((page - 1) * 1)
+        //     .limit(pagination)
+        //     .populate('instructor', 'firstname lastname');
 
 
-        //Find how many results the query really had (not working)
-        //let count = await courses.count();
 
-        if (courses.length) {
-            return res.status(200).json({ message: "success", data: courses });
-            //return res.status(200).json({message: "sucess", data: {courses: courses, count: count}});
+        // if (courses.length) {
+        //     return res.status(200).json({ message: "success", data: courses });
+        //     //return res.status(200).json({message: "sucess", data: {courses: courses, count: count}});
+        // }
+        // else {
+        //     return res.status(200).json({ message: "No result" });
+        // }
+        const limit = req.query.size ? parseInt(req.query.size) : 5;
+        const offset = req.query.page ? parseInt(req.query.page) * limit : 0;
+        const options = {
+            sort: sortBy,
+            populate: [
+                // { path: 'subject', model: 'Subject', select: 'name'},
+                { path: 'instructor', model: 'User', select: 'firstname lastname' }
+            ],
+            offset: offset,
+            limit: limit
         }
-        else {
-            return res.status(200).json({ message: "No result" });
-        }
+        let condition = {
+            $and: searchQuery
+        };
+        Course.paginate(condition, options)
+            .then((data) => {
+                const returnData = {
+                    totalItems: data.totalDocs,
+                    courses: data.docs,
+                    totalPages: data.totalPages,
+                    currentPage: data.page - 1,
+                }
+                if (data.docs.length) {
+                    res.status(200).json({ message: "success", data: returnData });
+                }
+                else {
+                    res.status(200).json({ message: "No result" });
+                }
+            })
+            .catch((err) => {
+                next(err);
+            })
     }
     catch (err) {
         next(err);

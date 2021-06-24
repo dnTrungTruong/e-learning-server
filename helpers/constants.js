@@ -4,6 +4,12 @@ module.exports = {
         ONLINE: "online",
         PROGRAMMING: "programming"
     },
+    COURSE_STATUS: {
+        NEW: 'new',
+        PENDING: 'pending',
+        APPROVED: 'approved',
+        DISABLED: 'disabled'
+    },
     USER_ROLES: {
         ADMIN: 'Admin',
         MODERATOR: 'Moderator',
