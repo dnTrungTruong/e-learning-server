@@ -11,7 +11,7 @@ exports.createCourse = function (req, res, next) {
 
     //The instructor will be the user who send the request
     course.instructor = res.locals.user.sub;
-    course.status = Constants.COURSE_STATUS.APPROVED;
+    course.status = Constants.COURSE_STATUS.NEW;
 
     course.save(function (err, createdCourse) {
         if (err) {
@@ -55,12 +55,11 @@ exports.getCourseInfo = function (req, res, next) {
         }
     });
 }
-//Get course with detail information using populate
+
 exports.getCourseDetails = function (req, res, next) {
     Course.findById(req.params.id)
         .populate('subject', 'name')
         .populate('instructor', 'firstname lastname')
-        //.populate('sections', 'name')
         .populate({
             path: 'sections',
             model: 'Section',
@@ -68,6 +67,33 @@ exports.getCourseDetails = function (req, res, next) {
             populate: {
                 path: 'lectures',
                 model: 'Lecture',
+                select: { '_id': 1, 'name': 1 }
+            }
+        })
+        .exec(function (err, course) {
+            if (err) {
+                next(err);
+            }
+            else {
+                if (!course) {
+                    return res.status(200).json({ message: "No result" });
+                }
+                res.status(200).json({ message: "success", data: course });
+            }
+        });
+}
+
+exports.getProgramingCourseDetails = function (req, res, next) {
+    Course.findById(req.params.id)
+        .populate('subject', 'name')
+        .populate('instructor', 'firstname lastname')
+        .populate({
+            path: 'sections',
+            model: 'Section',
+            select: { '_id': 1, 'name': 1, 'description': 1, 'lessons': 1 },
+            populate: {
+                path: 'lessons',
+                model: 'Lesson',
                 select: { '_id': 1, 'name': 1 }
             }
         })
@@ -106,6 +132,32 @@ exports.getCourseLearningDetails = function (req, res, next) {
             {
                 path: 'announcements',
                 model: 'Announcement'
+            }]
+        })
+        .exec(function (err, course) {
+            if (err) {
+                next(err);
+            }
+            else {
+                if (!course) {
+                    return res.status(200).json({ message: "No result" });
+                }
+                res.status(200).json({ message: "success", data: course });
+            }
+        });
+}
+
+
+exports.getProgramingCourseLearningDetails = function (req, res, next) {
+    Course.findById(req.params.id)
+        .populate('instructor', 'firstname lastname')
+        .populate('subject', 'name')
+        .populate({
+            path: 'sections',
+            model: 'Section',
+            populate: [{
+                path: 'lessons',
+                model: 'Lesson'
             }]
         })
         .exec(function (err, course) {

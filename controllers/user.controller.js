@@ -7,6 +7,7 @@ const config = require('config.json');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const Course = require('../models/course.model');
+const UserProgress = require('../models/userProgress.model')
 const Constants = require('../helpers/constants');
 // const { gmail } = require('googleapis/build/src/apis/gmail');
 const { ObjectId } = require('mongodb');
@@ -141,31 +142,33 @@ exports.getUsers = function (req, res, next) {
     const limit = req.query.size ? parseInt(req.query.size) : 5;
     const offset = req.query.page ? parseInt(req.query.page) * limit : 0;
 
-    const condition = req.query.keyword ? 
-    {$or: [
-        {$text: {$search: req.query.keyword}},
-        {email: { "$regex": req.query.keyword, "$options": "i" }}
-    ]}
-    : {};
-    
+    const condition = req.query.keyword ?
+        {
+            $or: [
+                { $text: { $search: req.query.keyword } },
+                { email: { "$regex": req.query.keyword, "$options": "i" } }
+            ]
+        }
+        : {};
+
     User.paginate(condition, { select: '-password -gender -birthday -enrolledCourses -createdCourses', offset, limit })
-    .then((data) => {
-        const returnData = {
-            totalItems: data.totalDocs,
-            users: data.docs,
-            totalPages: data.totalPages,
-            currentPage: data.page - 1,
-        }
-        if (data.docs.length) {
-            res.status(200).json({ message: "success", data: returnData });
-        }
-        else {
-            res.status(200).json({ message: "No result" });
-        }
-    })
-    .catch((err) => {
-        next(err);
-    })
+        .then((data) => {
+            const returnData = {
+                totalItems: data.totalDocs,
+                users: data.docs,
+                totalPages: data.totalPages,
+                currentPage: data.page - 1,
+            }
+            if (data.docs.length) {
+                res.status(200).json({ message: "success", data: returnData });
+            }
+            else {
+                res.status(200).json({ message: "No result" });
+            }
+        })
+        .catch((err) => {
+            next(err);
+        })
 }
 
 //get user info
@@ -213,12 +216,18 @@ exports.getMyEnrolledCourses = function (req, res, next) {
                 Course.find({ '_id': { $in: user.enrolledCourses } })
                     .populate('subject', 'name')
                     .populate('instructor', 'firstname lastname')
+                    .populate('sections', 'lessons')
                     .exec(function (err, courses) {
-                        if (courses) {
-                            res.status(200).json({ message: "success", data: courses });
+                        if (err) {
+                            next(err);
                         }
                         else {
-                            res.status(200).json({ message: "No result" });
+                            if (courses) {
+                                res.status(200).json({ message: "success", data: courses });
+                            }
+                            else {
+                                res.status(200).json({ message: "No result" });
+                            }
                         }
                     })
             }
@@ -289,7 +298,7 @@ exports.changePassword = async function (req, res, next) {
         const user = await User.findById(req.params.id);
         if (!user) return res.status(200).json({ message: "Provided user is not valid" });
 
-        //Need to change to use validation middleware here
+        //TODO: Need to change to use validation middleware here
         if (!(req.body.password && req.body.newPassword && req.body.newPasswordConfirm)) return res.status(200).json({ message: "Please provide all needed information" });
 
         const valid = await bcrypt.compare(req.body.password, user.password);
@@ -314,7 +323,7 @@ exports.changePassword = async function (req, res, next) {
 }
 
 exports.enrollCourse = function (req, res, next) {
-    //NEED TO CONFIRM BEFORE ADD TO COURSE
+    //TODO: NEED TO CONFIRM BEFORE ADD TO COURSE
     User.findById(res.locals.user.sub, function (err, user) {
         if (err) {
             next(err);
@@ -322,27 +331,47 @@ exports.enrollCourse = function (req, res, next) {
         else {
             if (user) {
                 if (user.enrolledCourses.includes(req.params.id))
-                return res.status(200).json({ message: "User already enrolled to this course" });;
-                
-                user.enrolledCourses.push(ObjectId(req.params.id));
-
-                user.save(function (err, updatedUser) {
-                    if (err) {
-                        next(err);
-                    }
+                    return res.status(200).json({ message: "User already enrolled to this course" });;
+                Course.findById(req.params.id, function (err, course) {
+                    if (err) next(err);
                     else {
-                        res.status(200).json({ message: "success", data: updatedUser })
+                        if (!course) return res.status(200).json({ message: "The provided course is not valid" });
+                        user.enrolledCourses.push(ObjectId(req.params.id));
+
+                        user.save(function (err, updatedUser) {
+                            if (err) {
+                                next(err);
+                            }
+                            else {
+                                if (course.type == Constants.COURSE_TYPES.PROGRAMING) {
+                                    userProgress = new UserProgress({
+                                        user: res.locals.user.sub,
+                                        course: course._id,
+                                    });
+                                    userProgress.save(function (err) {
+                                        if (err) {
+                                            next(err);
+                                        }
+                                        else {
+                                            res.status(200).json({ message: "success", data: updatedUser })
+                                        }
+                                    })
+                                }
+                                else {
+                                    res.status(200).json({ message: "success", data: updatedUser })
+                                }
+                            }
+                        })
                     }
                 })
             }
             else {
                 res.status(200).json({ message: "Provided user is not valid" });
             }
-
         }
     })
 }
-exports.sendTestMail = async function(req, res, next) {
+exports.sendTestMail = async function (req, res, next) {
     try {
         const data = {
             from: config.EMAIL_USERNAME,
@@ -355,7 +384,7 @@ exports.sendTestMail = async function(req, res, next) {
 
         res.status(200).json({ message: "success" });
     }
-    catch(err) {
+    catch (err) {
         next(err);
     }
 }

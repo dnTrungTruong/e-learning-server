@@ -110,6 +110,7 @@ exports.editSection = function (req, res ,next) {
                 return res.status(200).json({ message: "Provided section is not valid"}); 
             }
             section.name = req.body.name || section.name;
+            section.description = req.body.description || section.description;
             
             section.save(function (err, updatedSection) {
                 if (err) {

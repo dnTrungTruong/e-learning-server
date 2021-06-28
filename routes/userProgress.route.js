@@ -1,23 +1,25 @@
 const express = require('express');
-const CertificateController = require('../controllers/certificate.controller');
+const UserProgressController = require('../controllers/userProgress.controller');
 const Authorization = require('../helpers/authorization');
 const Validation = require('../helpers/validation');
 const Constants = require('../helpers/constants')
 
 const router = express.Router();
 
+
 router.get('/:id', 
 Validation.areParamsValidObjectIdCasting(),
 Authorization.authorize(),
-CertificateController.getCertificate)
+UserProgressController.getUserProgress)
 
-
-router.post('/', 
+router.post('/:id',
+Validation.areParamsValidObjectIdCasting(),
 Authorization.authorize(),
-CertificateController.createCertificate)
+UserProgressController.createUserProgress)
 
-router.post('/programing', 
+router.post('/update-current-lesson/:id',
+Validation.areParamsValidObjectIdCasting(),
 Authorization.authorize(),
-CertificateController.createCertificateProgramingCourse)
+UserProgressController.updateCurrentLesson)
 
 module.exports = router

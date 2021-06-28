@@ -2,7 +2,7 @@ module.exports = {
     COURSE_TYPES: {
         MOOC: "mooc",
         ONLINE: "online",
-        PROGRAMMING: "programming"
+        PROGRAMING: "programing"
     },
     COURSE_STATUS: {
         NEW: 'new',

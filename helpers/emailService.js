@@ -8,7 +8,7 @@ const OAuth2 = google.auth.OAuth2;
 const oAuth2Client = new OAuth2(config.GOOGLE_CLIENT_ID, config.GOOGLE_CLIENT_SECRET, config.GOOGLE_REDIRECT_URL);
 oAuth2Client.setCredentials({refresh_token: config.GOOGLE_REFRESH_TOKEN});
 
-const accessToken = oAuth2Client.getAccessToken();
+const accessToken = oAuth2Client.getAccessToken().catch(err => {console.log("Warning: Google OAuth refresh token is expired and need to be refreshed.")});
 const emailService = nodemailer.createTransport({
     service: config.EMAIL_SERVICE,
     auth: {

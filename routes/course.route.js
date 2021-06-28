@@ -39,6 +39,18 @@ Validation.areParamsValidObjectIdCasting(),
 // Authorization.authorizeEnrolledCourse(),
 CourseController.getCourseLearningDetails)
 
+router.get('/programing/:id',
+Validation.areParamsValidObjectIdCasting(),
+// Authorization.authorize(),
+// Authorization.authorizeEnrolledCourse(),
+CourseController.getProgramingCourseDetails)
+
+router.get('/programing/learning/:id',
+Validation.areParamsValidObjectIdCasting(),
+// Authorization.authorize(),
+// Authorization.authorizeEnrolledCourse(),
+CourseController.getProgramingCourseLearningDetails)
+
 router.post('/',
 Authorization.authorize([Constants.USER_ROLES.INSTRUCTOR, Constants.USER_ROLES.MODERATOR, Constants.USER_ROLES.ADMIN]),
 CourseController.createCourse)

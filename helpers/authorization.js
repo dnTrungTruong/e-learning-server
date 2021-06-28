@@ -3,6 +3,7 @@ const { secret } = require('config.json');
 const User = require('../models/user.model');
 const Section = require('../models/section.model');
 const Lecture = require('../models/lecture.model');
+const Lesson = require('../models/lesson.model');
 const Review = require('../models/review.model');
 const Role = require('../helpers/role');
 const Resource = require('../models/resource.model');
@@ -174,6 +175,49 @@ exports.authorizeCreatedCourseWithLecture = function () {
                                     return res.status(200).json({ message: 'Provided lecture is not valid'});
                                 }
                                 if (!user.createdCourses.includes(lecture.course)) {
+                                    return res.status(401).json({ message: 'Unauthorized' });
+                                }
+                                next();                
+                            }
+                        })
+                    }
+                }
+            });
+        }
+    ];
+}
+
+exports.authorizeCreatedCourseWithLesson = function () {
+    return [
+        (req, res , next) => {
+            User.findById(req.user.sub, function (err, user) {
+                if (err) {
+                    next(err);
+                }
+                else {
+                    if (!user) {
+                        return res.status(200).json({ message: 'Provided user is not valid'});
+                    }
+                    // if method is POST then the course_id is in req.body.course
+                    if (req.method == "POST") {
+                        if (req.body.course) {
+                            if (!user.createdCourses.includes(req.body.course)) {
+                                return res.status(401).json({ message: 'Unauthorized' });
+                            }
+                        }
+                        next();
+                    }
+                    //else we need to find the section with the lesson_id in the params to get the course_id
+                    else {
+                        Lesson.findById(req.params.id, function (err, lesson) {
+                            if (err) {
+                                next(error);
+                            }
+                            else {
+                                if (!lesson) {
+                                    return res.status(200).json({ message: 'Provided lesson is not valid'});
+                                }
+                                if (!user.createdCourses.includes(lesson.course)) {
                                     return res.status(401).json({ message: 'Unauthorized' });
                                 }
                                 next();                

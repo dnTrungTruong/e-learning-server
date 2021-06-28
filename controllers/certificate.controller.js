@@ -1,9 +1,9 @@
 const Certificate = require('../models/certificate.model');
 const Attempt = require('../models/attempt.model');
+const UserProgress = require('../models/userProgress.model');
 const Course = require('../models/course.model');
 const User = require('../models/user.model');
 const Jimp = require('jimp');
-const fs = require('fs');
 const s3 = require('../helpers/s3');
 const config = require('../config.json')
 
@@ -116,7 +116,94 @@ exports.createCertificate = async function (req, res, next) {
                             });
                         }
                         else {
-                            console.log(result);
+                            next(result.message);
+                        }
+                    })
+            }
+        })
+}
+
+exports.createCertificateProgramingCourse = async function (req, res, next) {
+    UserProgress.findOne({ user: res.locals.user.sub, course: req.body.course })
+        .populate({
+            path: 'progresses.section',
+            model: 'Section',
+            select: ['_id', 'lessons']
+        })
+        .populate({
+            path: 'course',
+            model: 'Course',
+            select: ['_id', 'sections'],
+            populate: {
+                path: 'sections',
+                model: 'Section',
+                select: ['_id', 'lessons']
+            }
+        })
+        .exec(function (err, userProgress) {
+            if (err) next(err);
+            else {
+                if (!userProgress) return res.status(200).json({ message: "No progress was found" });
+                if (userProgress.certificate) {
+                    return res.status(200).json({ message: "User has already have a certificate for this course" });
+                }
+                let lessons = 0;
+                let passed = 0;
+                userProgress.course.sections.forEach(section => {
+                    lessons += section.lessons.length;
+                });
+                userProgress.progresses.forEach(progress => {
+                    passed += progress.passedLessons.length;
+                });
+                if (passed < lessons) {
+                    return res.status(200).json({ message: "All lessons must be passed before claiming the certificate" });
+                }
+                let cert = new Certificate({
+                    course: userProgress.course._id,
+                    user: res.locals.user.sub,
+                    finalScore: 10,
+                    date: Date.now()
+                });
+
+                makeCertificate(cert.course, cert.user, cert._id, cert.date)
+                    .then(result => {
+                        if (result.message == "success") {
+                            const params = {
+                                Bucket: config.AWS_BUCKET_NAME,
+                                Key: "course_certificates/" + Date.now() + '-' + cert._id + ".png",
+                                ACL: 'public-read',
+                                Body: result.data
+                            };
+
+                            // Uploading files to the bucket
+                            s3.upload(params, function (err, data) {
+                                if (err) {
+                                    throw err;
+                                }
+                                cert.url = data.Location;
+                                //cert.url = data.key.split('/')[1];
+                                //cert.url = `${baseUrl}/s3/certificate/${req.params.course_id}/${data.key.split('/')[1]}`;
+
+                                //save
+                                cert.save(function (err, createdCert) {
+                                    if (err) {
+                                        next(err);
+                                    }
+                                    else {
+                                        userProgress.certificate = createdCert._id;
+                                        userProgress.save(function (err) {
+                                            if (err) {
+                                                next(err);
+                                            }
+                                            else {
+                                                return res.status(200).json({ message: "success", data: createdCert });
+                                            }
+                                        });
+                                    }
+                                })
+                            });
+                        }
+                        else {
                             next(result.message);
                         }
                     })
@@ -206,7 +293,6 @@ const makeCertificate = (course, user, certId, certDate) => {
             );
             //Output file to upload to S3
             image.getBuffer(Jimp.AUTO, function (err, buffer) {
-                console.log(buffer);
                 let result = {
                     message: "success",
                     data: buffer
@@ -215,7 +301,6 @@ const makeCertificate = (course, user, certId, certDate) => {
             })
         })
             .catch(err => {
-                console.log(err);
                 let result = {
                     message: err
                 }
