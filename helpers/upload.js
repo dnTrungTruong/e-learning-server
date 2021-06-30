@@ -98,8 +98,8 @@ function checkFileType(file, cb) {
     if (file.originalname.charCodeAt(i) > 127 || file.originalname.charCodeAt(i) === 47) return cb('File name is invalid. Please dont use any UTF-8 or UTF-16 character.');
   }
   // Allowed ext
-  const fileExtensions = /doc|docx|ppt|rar|zip|txt|pdf/;
-  const fileTypes = /doc|docx|vnd.ms-powerpoint|x-rar-compressed|zip|text|pdf/;
+  const fileExtensions = /doc|docx|ppt|rar|zip|txt|pdf|xls|xlsx/;
+  const fileTypes = /doc|docx|vnd.ms-powerpoint|x-rar-compressed|zip|text|pdf|xls|xlsx/;
   // Check ext
   const extname = fileExtensions.test(path.extname(file.originalname).toLowerCase());
   // Check mime
