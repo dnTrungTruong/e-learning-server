@@ -8,7 +8,8 @@ module.exports = {
         NEW: 'new',
         PENDING: 'pending',
         APPROVED: 'approved',
-        DISABLED: 'disabled'
+        DISABLED: 'disabled',
+        REJECTED: 'rejected'
     },
     USER_ROLES: {
         ADMIN: 'Admin',

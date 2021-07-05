@@ -66,6 +66,16 @@ Validation.areParamsValidObjectIdCasting(),
 Authorization.authorize([Constants.USER_ROLES.MODERATOR, Constants.USER_ROLES.ADMIN]),
 CourseController.approveCourse)
 
+router.put('/reject/:id',
+Validation.areParamsValidObjectIdCasting(),
+Authorization.authorize([Constants.USER_ROLES.MODERATOR, Constants.USER_ROLES.ADMIN]),
+CourseController.rejectCourse)
+
+router.put('/disable/:id',
+Validation.areParamsValidObjectIdCasting(),
+Authorization.authorize([Constants.USER_ROLES.MODERATOR, Constants.USER_ROLES.ADMIN]),
+CourseController.disableCourse)
+
 router.put('/:id',
 Validation.areParamsValidObjectIdCasting(),
 Authorization.authorize([Constants.USER_ROLES.INSTRUCTOR, Constants.USER_ROLES.MODERATOR, Constants.USER_ROLES.ADMIN]),

@@ -178,13 +178,14 @@ exports.getCourseListAll = async function (req, res, next) {
     const offset = req.query.page ? parseInt(req.query.page) * limit : 0;
 
     var condition = {};
+    console.log(req.query.status);
     if (req.query.keyword) {
         let users = await User.find({ $text: { $search: req.query.keyword } }, { _id: 1 });
 
         if (req.query.status) {
             condition = {
                 $and: [
-                    { status: req.query.status },
+                    { status: { $in: req.query.status } },
                     {
                         $or: [
                             //{ $text: {$search: req.query.keyword} }, // Method 1: Using index
@@ -208,7 +209,7 @@ exports.getCourseListAll = async function (req, res, next) {
     else {
         if (req.query.status) {
             condition = {
-                status: req.query.status
+                status: { $in: req.query.status } 
             };
         }
         else {
@@ -353,7 +354,7 @@ exports.submitCourseForApproval = function (req, res, next) {
             if (course.status) {
                 return res.status(200).json({ message: "This course has already been submitted for approval" })
             }
-            course.status = "pending"
+            course.status = Constants.COURSE_STATUS.PENDING;
             course.save(function (err) {
                 if (err) {
                     next(err);
@@ -368,7 +369,7 @@ exports.submitCourseForApproval = function (req, res, next) {
 
 exports.approveCourse = function (req, res, next) {
     const courseId = req.params.id;
-    Course.updateOne({ _id: courseId }, { status: "approved" }, function (err) {
+    Course.updateOne({ _id: courseId }, { status: Constants.COURSE_STATUS.APPROVED }, function (err) {
         if (err) {
             next(err);
         }
@@ -378,6 +379,29 @@ exports.approveCourse = function (req, res, next) {
     })
 }
 
+exports.rejectCourse = function (req, res, next) {
+    const courseId = req.params.id;
+    Course.updateOne({ _id: courseId }, { status: Constants.COURSE_STATUS.REJECTED }, function (err) {
+        if (err) {
+            next(err);
+        }
+        else {
+            res.status(200).json({ message: "success" })
+        }
+    })
+}
+
+exports.disableCourse = function (req, res, next) {
+    const courseId = req.params.id;
+    Course.updateOne({ _id: courseId }, { status: Constants.COURSE_STATUS.DISABLED }, function (err) {
+        if (err) {
+            next(err);
+        }
+        else {
+            res.status(200).json({ message: "success" })
+        }
+    })
+}
 
 exports.searchCourse = async function (req, res, next) {
 

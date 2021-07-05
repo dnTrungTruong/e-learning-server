@@ -71,7 +71,12 @@ exports.createAttempt = function (req, res, next) {
 }
 
 exports.getAttempt = function (req, res, next) {
-    Attempt.findOne({ user: res.locals.user.sub, course: req.params.id }, function (err, attempt) {
+    Attempt.findOne({ user: res.locals.user.sub, course: req.params.id })
+    .populate({
+        path: 'quizzes.quiz',
+        model: 'Quiz',
+        select: ['name', 'limitTime', 'isFinal']
+    }).exec(function (err, attempt) {
         if (err) {
             next(err);
         }
@@ -111,6 +116,7 @@ exports.getAttemptByQuiz = function (req, res, next) {
                         const index = attempt.quizzes.findIndex(function (quizzes) {
                             return quizzes.quiz.equals(quiz._id);
                         });
+                        console.log(attempt);
                         //Check if quiz exist in attempt.quizzes
                         if (index < 0) {
                             attempt.quizzes.push({

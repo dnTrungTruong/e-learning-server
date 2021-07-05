@@ -16,7 +16,7 @@ fs.readFile(`${__dirname}/${codeDirectory}/Temp.js`, 'utf8', function (err, code
     }
     catch (e) {
         if ((e instanceof AssertionError) || (e.constructor.name == "AssertionError")) {
-            console.log("A TEST FAILED: " + e.message);
+            console.log("A TEST FAILED: " + e.message.split(':')[0]);
         }
         else {
             console.log("A TEST FAILED TO EXECUTE DUE TO ERROR");
@@ -28,7 +28,7 @@ fs.readFile(`${__dirname}/${codeDirectory}/Temp.js`, 'utf8', function (err, code
     }
     catch (e) {
         if ((e instanceof AssertionError) || (e.constructor.name == "AssertionError")) {
-            console.log("A TEST FAILED: " + e.message);
+            console.log("A TEST FAILED: " + e.message.split(':')[0]);
         }
         else {
             console.log("A TEST FAILED TO EXECUTE DUE TO ERROR");
@@ -40,7 +40,7 @@ fs.readFile(`${__dirname}/${codeDirectory}/Temp.js`, 'utf8', function (err, code
     }
     catch (e) {
         if ((e instanceof AssertionError) || (e.constructor.name == "AssertionError")) {
-            console.log("A TEST FAILED: " + e.message);
+            console.log("A TEST FAILED: " + e.message.split(':')[0]);
         }
         else {
             console.log("A TEST FAILED TO EXECUTE DUE TO ERROR");
@@ -52,7 +52,7 @@ fs.readFile(`${__dirname}/${codeDirectory}/Temp.js`, 'utf8', function (err, code
     }
     catch (e) {
         if ((e instanceof AssertionError) || (e.constructor.name == "AssertionError")) {
-            console.log("A TEST FAILED: " + e.message);
+            console.log("A TEST FAILED: " + e.message.split(':')[0]);
         }
         else {
             console.log("A TEST FAILED TO EXECUTE DUE TO ERROR");
@@ -64,7 +64,7 @@ fs.readFile(`${__dirname}/${codeDirectory}/Temp.js`, 'utf8', function (err, code
     }
     catch (e) {
         if ((e instanceof AssertionError) || (e.constructor.name == "AssertionError")) {
-            console.log("A TEST FAILED: " + e.message);
+            console.log("A TEST FAILED: " + e.message.split(':')[0]);
         }
         else {
             console.log("A TEST FAILED TO EXECUTE DUE TO ERROR");

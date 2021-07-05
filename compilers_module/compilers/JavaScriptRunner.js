@@ -29,7 +29,7 @@ class JavaScriptRunner extends Runner {
       console.log(directory);
       console.log(file);
       let containerName = Date.now();
-      let dockerImage = "node:12-alpine";
+      let dockerImage = "javascript-runner";
       let lessonPath = path.join(directory, '../');
       let userDirectory = path.basename(directory);
       console.log(`LessonPath: ${lessonPath}`);
