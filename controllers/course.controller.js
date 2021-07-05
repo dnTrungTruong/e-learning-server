@@ -178,7 +178,6 @@ exports.getCourseListAll = async function (req, res, next) {
     const offset = req.query.page ? parseInt(req.query.page) * limit : 0;
 
     var condition = {};
-    console.log(req.query.status);
     if (req.query.keyword) {
         let users = await User.find({ $text: { $search: req.query.keyword } }, { _id: 1 });
 
