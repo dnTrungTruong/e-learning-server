@@ -37,7 +37,6 @@ exports.createAttempt = function (req, res, next) {
                         next(err);
                     }
                     else {
-                        console.log(attempt);
                         attempt.save(function (err, createdAttempt) {
                             if (err) {
                                 next(err)
@@ -116,7 +115,6 @@ exports.getAttemptByQuiz = function (req, res, next) {
                         const index = attempt.quizzes.findIndex(function (quizzes) {
                             return quizzes.quiz.equals(quiz._id);
                         });
-                        console.log(attempt);
                         //Check if quiz exist in attempt.quizzes
                         if (index < 0) {
                             attempt.quizzes.push({

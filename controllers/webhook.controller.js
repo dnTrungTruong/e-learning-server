@@ -186,15 +186,18 @@ function sendPasswordRecoveryMail(agent) {
                                     text: `Please use the following link within the next 10 minutes to reset your password on E-Learning: ${recoveryUrl}/${userEmail}/${secretCode}`,
                                     html: `<p>Please use the following link within the next 10 minutes to reset your password on E-Learning: <a href="${recoveryUrl}/${userEmail}/${secretCode}">${recoveryUrl}/${userEmail}/${secretCode}</a></p>`,
                                 };
-        
-                                return emailService.sendMail(data)
+
+                                emailService.sendMail(data)
                                         .then((result) => {
+                                            console.log("Recover mail sent");
                                             agent.add("OK. Everything is done.");
                                             return agent.add("We've sent to your email address an mail to help you to recover your password. Please check your mail.");
                                         })
                                         .catch((err) => {
                                             return agent.add("Something went wrong. " + err);
                                         })
+                                agent.add("OK. We have sent you an email to recover your password.");
+                                return agent.add("In case you didn't receive the email, there may be a system error, please try again later.");
                             })
                             .catch((err) => {
                                 agent.add("Something went wrong. " + err);

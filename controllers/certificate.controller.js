@@ -18,7 +18,7 @@ exports.getCertificate = function (req, res, next) {
             {
                 path: 'course',
                 model: 'Course',
-                select: ['_id', 'name', 'instructor'],
+                select: ['_id', 'name', 'instructor', 'type'],
                 populate: {
                     path: 'instructor',
                     model: 'User',
@@ -75,7 +75,6 @@ exports.createCertificate = async function (req, res, next) {
                     finalScore: attempt.quizzes[finalQuizIndex].highestScore,
                     date: Date.now()
                 });
-                console.log(cert);
 
                 makeCertificate(cert.course, cert.user, cert._id, cert.date)
                     .then(result => {
