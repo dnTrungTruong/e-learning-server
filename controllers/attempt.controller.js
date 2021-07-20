@@ -305,9 +305,9 @@ exports.submitAttempt = function (req, res, next) {
                         return res.status(200).json({ message: "Please start the quiz attempt before submitting" });
                     }
                     //Actual endtime will be endtime plus 30 seconds
-                    if ((attempt.quizzes[index].attempts[attempt.quizzes[index].attempts.length - 1].attemptEndTime + 30 * 1000) < Date.now()) {
-                        return res.status(200).json({ message: "Submission time has expired" });
-                    }
+                    // if ((attempt.quizzes[index].attempts[attempt.quizzes[index].attempts.length - 1].attemptEndTime + 30 * 1000) < Date.now()) {
+                    //     return res.status(200).json({ message: "Submission time has expired" });
+                    // }
 
                     if (attempt.quizzes[index].attempts[attempt.quizzes[index].attempts.length - 1].attemptSubmittedTime) {
                         return res.status(200).json({ message: "You have already subbmited this attemp" });
