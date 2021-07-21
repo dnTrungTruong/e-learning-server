@@ -10,7 +10,7 @@ exports.createReview = async function(req, res, next){
             content: req.body.content
         });
         //Check if user have made any review before
-        const check = await Review.findOne({user: review.user});
+        const check = await Review.findOne({user: review.user, course: req.body.course});
         if (check) return next("User have already made a review for this course.");
         //Save the review
         const savedReview = await review.save();

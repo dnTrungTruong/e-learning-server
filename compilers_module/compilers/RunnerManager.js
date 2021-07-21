@@ -36,17 +36,10 @@ module.exports = {
 
     const directory = path.join(__dirname, '../lessons', name, Date.now() + '-temp');
     const file = path.join(directory, runner.defaultFile());
-    console.log(`file: ${file}`);
     const filename = path.parse(file).name; // Temp
     const extension = path.parse(file).ext; // .js
-    console.log(`filename: ${filename}`);
-    console.log(`extension: ${extension}`);
-
-    console.log("test started");
-    //console.log(response);
 
     FileHelper.saveFile(file, code, () => {
-      console.log("runner started");
       runner.run(file, directory, filename, extension, (passed, testMessage, status, runMessage) => {
 
         let message = "";

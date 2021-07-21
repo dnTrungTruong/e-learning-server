@@ -36,7 +36,6 @@ exports.getUserProgress = function (req, res, next) {
 }
 
 exports.updateCurrentLesson = function (req, res, next) {
-    console.log(req.body);
     if (!req.body.section) {
         return res.status(200).json({ message: "Section is required" });
     }
@@ -58,7 +57,6 @@ exports.updateCurrentLesson = function (req, res, next) {
                     passedLessons: []
                 });
             }
-            console.log(userProgress);
             userProgress.save(function(err, updatedUserProgress) {
                 if (err) 
                     next(err);

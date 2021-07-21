@@ -23,7 +23,6 @@ module.exports = {
       //   return;
       // }
       file = path.join(__dirname, '../lessons', name, 'template.js');
-      console.log(`getTemplate:${file}`);
       fs.readFile(file, (err, data) => {
         if (err) {
           console.log(err);
@@ -36,13 +35,11 @@ module.exports = {
     saveFile(file, code, callback) {
       // create parent directories if they doesn't exist.
       mkdirp(getDirName(file)).then((made) => {
-        console.log("created folder");
         return fs.writeFile(file, code, (err2) => {
           if (err2) {
               console.log(err2);
             throw err2;
           }
-          console.log("created file");
    
           callback();
         });

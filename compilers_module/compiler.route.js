@@ -9,9 +9,7 @@ const router = express.Router();
 router.get('/get-template', (req, res) => {
   // const language = req.params.lang;
   const challengeName = req.query.name;
-  console.log(challengeName);
   FileHelper.getFile(challengeName, (content) => {
-    console.log(content);
     if (content == "error") {
       const response = {
         message: "error",
@@ -34,7 +32,6 @@ router.get('/get-template', (req, res) => {
  
 router.post('/run', Authorization.authorize(), (req, res) => {
   const file = req.body;
-  console.log(`file.lang: ${file.lang}`, `file.code:${file.code}`);
   RunnerManager.run(file.lang, file.name, file.code, res);
 });
 
