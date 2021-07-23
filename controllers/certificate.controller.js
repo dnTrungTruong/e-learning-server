@@ -256,7 +256,7 @@ const makeCertificate = (course, user, certId, certDate) => {
                 Sanchez_26_Darkblue, xCordinate, contentYCordinate + 40, courseRetObj.name, 400
             );
             //Print instructor name
-            let instructorXCordinate = 55;
+            let instructorXCordinate = 48;
             let instructorYCordinate = 558;
             let instructorNameMaxWidth = 280;
             let space = 29;
@@ -264,20 +264,29 @@ const makeCertificate = (course, user, certId, certDate) => {
             let measureTextWidth = Jimp.measureText(Sanchez_22_Aqua, instructorName, instructorNameMaxWidth);
             if (measureTextWidth > instructorNameMaxWidth) {
                 image.print(
-                    Sanchez_22_Aqua, instructorXCordinate + 40, instructorYCordinate, instructorName, instructorNameMaxWidth - 40
+                    Sanchez_22_Aqua, instructorXCordinate + 18, instructorYCordinate, {
+                        text: instructorName,
+                        alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER
+                    }, instructorNameMaxWidth - 40
                 );
                 space = 58;
             }
             else {
                 image.print(
-                    Sanchez_22_Aqua, instructorXCordinate + 15, instructorYCordinate, instructorName, instructorNameMaxWidth
+                    Sanchez_22_Aqua, instructorXCordinate, instructorYCordinate, {
+                        text: instructorName,
+                        alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER
+                    }, instructorNameMaxWidth
                 );
             }
 
-            let instructorNameXCordinate = 85;
+            let instructorNameXCordinate = 48;
             let instructorNameYCordinate = instructorYCordinate + space + 7;
             image.print(
-                Sanchez_22_Darkblue, instructorNameXCordinate, instructorNameYCordinate, 'Course Instructor'
+                Sanchez_22_Darkblue, instructorNameXCordinate, instructorNameYCordinate, {
+                    text: "Course Instructor",
+                    alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER
+                }, instructorNameMaxWidth
             );
             //Print date & certificate number
             let dateXCordinate = 88;
