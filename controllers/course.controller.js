@@ -4,6 +4,7 @@ const Subject = require('../models/subject.model');
 const { search } = require('../routes/course.route');
 const { query } = require('express');
 const Constants = require('../helpers/constants')
+const { ObjectId } = require('mongodb');
 
 
 exports.createCourse = function (req, res, next) {
@@ -81,6 +82,28 @@ exports.getCourseDetails = function (req, res, next) {
                 res.status(200).json({ message: "success", data: course });
             }
         });
+}
+
+
+exports.getMyCreatedCourses = function (req, res, next) {
+    User.findById(res.locals.user.sub, function (err, user) {
+        if (err) {
+            next(err);
+        }
+        else {
+            if (!user) return res.status(200).json({ message: "Requested user undefined" });
+
+            Course.find({ _id: { $in: user.createdCourses}}, 'name img_url status type', function(err, courses) {
+                if (err) {
+                    next(err);
+                }
+                else {
+                    if (!courses.length) return res.status(200).json({ message: "No result" });
+                    res.status(200).json({ message: "success", data: courses });
+                }
+            })
+        }
+    })
 }
 
 exports.getProgramingCourseDetails = function (req, res, next) {
@@ -350,8 +373,11 @@ exports.submitCourseForApproval = function (req, res, next) {
             if (!course) {
                 return res.status(200).json({ message: "Course provided course not exist" });
             }
-            if (course.status) {
+            if (course.status == 'pending' ) {
                 return res.status(200).json({ message: "This course has already been submitted for approval" })
+            }
+            if (course.status == 'approved' ) {
+                return res.status(200).json({ message: "This course has already been approved" })
             }
             course.status = Constants.COURSE_STATUS.PENDING;
             course.save(function (err) {
@@ -506,6 +532,7 @@ exports.editCourse = function (req, res, next) {
             }
             course.name = req.body.name || course.name;
             course.subject = req.body.subject || course.subject;
+            course.overview = req.body.overview || course.overview;
             course.description = req.body.description || course.description;
             course.objectives = req.body.objectives || course.objectives;
             course.price = req.body.price || course.price;

@@ -266,6 +266,18 @@ exports.editInfo = function (req, res, next) {
     })
 }
 
+exports.becomeAnInstructor = function (req, res, next) {
+    User.updateOne({_id: res.local.user.sub}, 
+        { role: Constants.USER_ROLES.INSTRUCTOR}, function (err, docs) {
+        if (err){
+            next(err);
+        }
+        else{
+            res.status(200).json({ message: "success"})
+        }
+    });
+}
+
 exports.editInfoForAdmin = function (req, res, next) {
     User.findById(req.params.id, function (err, user) {
         if (err) {

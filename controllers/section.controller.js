@@ -47,7 +47,7 @@ exports.createSection = function(req, res, next){
                         return res.status(200).json({ message: "Provided course is not valid"}); 
                     }
                     //insert or append to sections list depend on index
-                    if (req.params.index) {
+                    if (req.params.index && req.params.index > 0) {
                         result.sections.splice(req.params.index, 0, createdSection._id);
                     }
                     else {

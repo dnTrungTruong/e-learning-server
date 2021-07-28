@@ -68,12 +68,35 @@ exports.createAnnouncement = async function(req, res, next){
         await notification.save();
         //Save the announcement
         const savedAnnouncement = await announcement.save();
-
         return res.status(200).json({message: "success", data: savedAnnouncement});
     }
     catch(err) {
         next(err);
     }
+}
+
+exports.editAnnouncement = function (req, res ,next) {
+    Announcement.findById(req.params.id, function (err, announcement) {
+        if (err) {
+            next(err);
+        }
+        else {
+            if(!announcement) {
+                return res.status(200).json({ message: "Provided announcement is not valid"}); 
+            }
+            announcement.title = req.body.title || announcement.title;
+            announcement.content = req.body.content || announcement.content;
+            
+            announcement.save(function (err, updatedAnnouncement) {
+                if (err) {
+                    next(err);
+                }
+                else {
+                    res.status(200).json({message: "success", data: updatedAnnouncement})
+                }
+            })
+        }
+    })
 }
 
 exports.postComment = async function(req, res, next){

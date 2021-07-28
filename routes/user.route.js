@@ -86,6 +86,11 @@ Validation.areParamsValidObjectIdCasting(),
 Authorization.authorize(Constants.USER_ROLES.ADMIN), 
 UserController.editInfoForAdmin)
 
+router.put('/become-an-instructor/', 
+Validation.areParamsValidObjectIdCasting(),
+Authorization.authorize(Constants.USER_ROLES.STUDENT), 
+UserController.becomeAnInstructor)
+
 router.put('/:id', 
 Validation.areParamsValidObjectIdCasting(),
 Authorization.authorize(), 

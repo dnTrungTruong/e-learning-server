@@ -22,6 +22,9 @@ router.get('/count-pending-courses',
 Authorization.authorize([Constants.USER_ROLES.MODERATOR, Constants.USER_ROLES.ADMIN]),
 CourseController.getPendingCoursesCount)
 
+router.get('/my-created-courses', 
+Authorization.authorize([Constants.USER_ROLES.INSTRUCTOR, Constants.USER_ROLES.MODERATOR, Constants.USER_ROLES.ADMIN]),
+CourseController.getMyCreatedCourses)
 
 router.get('/search/', CourseController.searchCourse)
 

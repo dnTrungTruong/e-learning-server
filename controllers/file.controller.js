@@ -5,11 +5,11 @@ const fs = require('fs');
 const config = require('../config.json')
 const s3 = require('../helpers/s3');
 const { nextTick } = require("process");
+const constants = require("../helpers/constants");
 
 //const resourcesDir = "/resources/";
 
 const port = process.env.NODE_ENV === 'production' ? 80 : 3000;
-const baseUrl = `http://localhost:${port}/api/file`;
 const awsS3Url = "https://e-learning-10r825s36vuq028g5csk.s3.amazonaws.com/";
 
 
@@ -52,6 +52,7 @@ exports.uploadDoc = (req, res) => {
     if (req.file == undefined) {
       return res.status(200).send({ message: "Please upload a file!" });
     }
+    const baseUrl = req.protocol + '://' + req.headers.host + '/api/file';
     return res.status(200).json({
       message: "success",
       data: `${baseUrl}/s3/resource/${req.params.course_id}/${encodeURI(req.file.key.substring(req.file.key.lastIndexOf('/')+1))}`

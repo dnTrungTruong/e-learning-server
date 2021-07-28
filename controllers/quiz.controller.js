@@ -110,6 +110,8 @@ exports.editQuiz = function (req, res, next) {
             }
             quiz.name = req.body.name || quiz.name;
             quiz.questions = req.body.questions || quiz.questions;
+            quiz.limitTime = req.body.limitTime || quiz.limitTime;
+            quiz.isFinal = req.body.isFinal || quiz.isFinal;
 
             quiz.save(function (err, updatedQuiz) {
                 if (err) {
