@@ -267,7 +267,7 @@ exports.editInfo = function (req, res, next) {
 }
 
 exports.becomeAnInstructor = function (req, res, next) {
-    User.updateOne({_id: res.local.user.sub}, 
+    User.updateOne({_id: res.locals.user.sub}, 
         { role: Constants.USER_ROLES.INSTRUCTOR}, function (err, docs) {
         if (err){
             next(err);
